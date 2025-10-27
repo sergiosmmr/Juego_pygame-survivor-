@@ -22,7 +22,7 @@ mover_izquierda = False
 
 #conrolar el frame rate
 reloj = pg.time.Clock()
-
+prueba = False
 run = True
 while run:
 
