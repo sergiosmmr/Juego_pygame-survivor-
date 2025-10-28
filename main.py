@@ -2,16 +2,26 @@ import pygame as pg
 import constantes_varaibles as cons
 import personaje as per
 
-#posicion del jugador
-jugador = per.Personaje (550, 450)
-
-
 pg.init()
 
-
 ventana = pg.display.set_mode((cons.ANCHO_VENTANA, cons.ALTO_VENTANA))
-
 pg. display.set_caption(cons.NOMBRE_JUEGO)
+
+def escalar_img(image, scale):
+    w = image.get_width()
+    h = image.get_height()
+    nueva_imagen = pg.transform.scale(image, (w*scale, h*scale))
+    return nueva_imagen
+animaciones = []
+for i in range(7):
+    img = pg.image.load(f"assets/images/characters/players/necro_mov_{i+1}.png")
+    img = escalar_img(img, cons.ESCALA_PERSONAJE)
+    animaciones.append(img)
+
+#posicion del jugador
+jugador = per.Personaje (550, 450, animaciones)
+
+
 
 #variables de movimiento del jugador
 
@@ -25,6 +35,9 @@ reloj = pg.time.Clock()
 prueba = True
 run = True
 while run:
+
+
+
 
     #que valla a 60 fps
     reloj.tick(cons.FPS)
@@ -49,6 +62,8 @@ while run:
 
         #mover al jugador
     jugador.movimiento(delta_x, delta_y)
+
+    jugador.update()
     
     
     jugador.dibujar(ventana)
