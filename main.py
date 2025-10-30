@@ -1,6 +1,7 @@
 import pygame as pg
 import constantes_varaibles as cons
 import personaje as per
+import weapon as wp
 
 pg.init()
 
@@ -12,14 +13,31 @@ def escalar_img(image, scale):
     h = image.get_height()
     nueva_imagen = pg.transform.scale(image, (w*scale, h*scale))
     return nueva_imagen
+
+##############importar imagenes#############
+#personaje
 animaciones = []
 for i in range(7):
     img = pg.image.load(f"assets/images/characters/players/necro_mov_{i+1}.png")
     img = escalar_img(img, cons.ESCALA_PERSONAJE)
     animaciones.append(img)
 
-#posicion del jugador
+#armas
+imagen_arma = pg.image.load(f"assets/images/weapons/vacio.png")
+imagen_arma = escalar_img(imagen_arma, cons.ESCALA_ARMA)
+
+#balas
+imagen_bala = pg.image.load(f"assets/images/weapons/bullets/fuego_1.png")
+imagen_bala = escalar_img(imagen_bala, cons.ESCALA_BALA)
+
+#crear un jugador de la clase personaje en posicion x , y
 jugador = per.Personaje (550, 450, animaciones)
+
+#crear un arma de la clase weapon centrada en jugador
+arma = wp.weapon(imagen_arma, imagen_bala)
+
+#crear un grupo de sprites
+grupo_balas = pg.sprite.Group()
 
 
 
@@ -63,10 +81,27 @@ while run:
         #mover al jugador
     jugador.movimiento(delta_x, delta_y)
 
+    #actualiza estado de jugador
     jugador.update()
     
+    #actualiza el esatdo del arma
+    bala = arma.update(jugador)
+
+    if bala:
+        grupo_balas.add(bala)
+    for bala in grupo_balas:
+        bala.update()    
     
+
+    #dibujar al jugadora
     jugador.dibujar(ventana)
+
+    #dibujar el arma
+    arma.dibujar(ventana)
+
+    #dibujar balas
+    for bala in grupo_balas:
+        bala.dibujar(ventana)
 
     
     for event in pg.event.get():

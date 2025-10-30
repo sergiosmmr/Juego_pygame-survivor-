@@ -21,7 +21,7 @@ class Personaje():
         self.update_time = pg.time.get_ticks()
         self.image = animaciones[self.frame_index]
         # crea el rectángulo para el personaje
-        self.forma = pg.Rect(0, 0, cons.ALTO_PERSONAJE, cons.ANCHO_PERSONAJE)
+        self.forma = self.image.get_rect()
         # posiciona el centro del rectángulo en las coordenadas (x, y)
         self.forma.center = (x, y)
 
@@ -46,4 +46,4 @@ class Personaje():
         imagen_flip = pg.transform.flip (self.image, self.flip, False)
         interfaz.blit(imagen_flip, self.forma)
         #dibuja el personaje en la superficie especificada
-        pg.draw.rect(interfaz, cons.COLOR_AMARILLO, self.forma, width=1)
+        #pg.draw.rect(interfaz, cons.COLOR_AMARILLO, self.forma, width=1)
