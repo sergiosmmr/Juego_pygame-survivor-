@@ -34,6 +34,15 @@ font = pg.font.Font("assets/font/Ryga.ttf", cons.TAMANIO_FUENTE_ENEMIGOS)
 
 
 ##############importar imagenes#############
+
+# energia
+corazon_vacio = pg.image.load("assets/images/items/corazon_vacio_1.png")
+corazon_vacio = escalar_img(corazon_vacio, cons.ESCALA_CORAZONES)
+corazon_medio = pg.image.load("assets/images/items/corazon_mitad_1.png")
+corazon_medio = escalar_img(corazon_medio, cons.ESCALA_CORAZONES)
+corazon_lleno = pg.image.load("assets/images/items/corazon_lleno_1.png")
+corazon_lleno = escalar_img(corazon_lleno, cons.ESCALA_CORAZONES)
+
 #personaje
 animaciones = []
 for i in range(7):
@@ -75,8 +84,21 @@ imagen_arma = escalar_img(imagen_arma, cons.ESCALA_ARMA)
 imagen_bala = pg.image.load(f"assets/images/weapons/bullets/fuego_1.png")
 imagen_bala = escalar_img(imagen_bala, cons.ESCALA_BALA)
 
+def vida_jugador():
+    corazon_mitad_dibujado = False
+    for i in range(5):
+        if jugador.energia >= ((i+1)*20):
+            ventana.blit(corazon_lleno, (5+i*50, 5))
+        elif jugador.energia % 20 >= 0 and not corazon_mitad_dibujado:
+            ventana.blit(corazon_medio, (5+i*50, 5))
+            corazon_mitad_dibujado = True
+        else: 
+            ventana.blit(corazon_vacio, (5+i*50, 5))
+
+
+
 #crear un jugador de la clase personaje en posicion x , y
-jugador = per.Personaje (550, 450, animaciones, 100)
+jugador = per.Personaje (550, 450, animaciones, 80)
 
 #crear un enemigo de la clase personaje
 alien = per.Personaje(400, 300, animacion_enemigos[0], 100)
@@ -176,6 +198,9 @@ while run:
     #dibujar balas
     for bala in grupo_balas:
         bala.dibujar(ventana)
+
+    #dibujar corazones
+    vida_jugador()
 
     #dibujar textos
     grupo_damage_text.draw(ventana)
