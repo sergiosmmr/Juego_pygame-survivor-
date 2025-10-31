@@ -1,6 +1,7 @@
 import pygame as pg
 import constantes_varaibles as cons
 import math
+import random
 
 
 
@@ -74,13 +75,26 @@ class Bullets (pg.sprite.Sprite):
         self.delta_x = math.cos(math.radians(self.angulo))*cons.VELOCIDAD_BALAS
         self.delta_y = - math.sin(math.radians(self.angulo))*cons.VELOCIDAD_BALAS    
 
-    def update(self):
+    def update(self, lista_enemigos):
+        danio = 0
+        pos_danio = None
         self.rect.x += self.delta_x
         self.rect.y += self.delta_y
 
         #ver si las balas salieron de pantalla para optimizar y borrar
         if self.rect.right < 0 or self.rect.left > cons.ANCHO_VENTANA or self.rect.bottom < 0 or self.rect.top > cons.ALTO_VENTANA:
             self.kill()
+
+        #verificar si hay colicion con enemigos
+        for enemigo in lista_enemigos:
+            if enemigo.forma.colliderect(self.rect):
+                danio = 15 + random.randint(-7, 7)
+                pos_danio = enemigo.forma
+                enemigo.energia -= danio
+                self.kill()
+                break
+    
+        return danio, pos_danio
 
     def dibujar(self, interfaz):
         interfaz.blit(self.image, (self.rect.centerx, self.rect.centery))

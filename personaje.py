@@ -12,7 +12,9 @@ class Personaje():
         el rectángulo que define la posición y el área de colisión
         del personaje en la pantalla.
     """
-    def __init__(self, x, y, animaciones):
+    def __init__(self, x, y, animaciones, energia):
+        self.energia = energia
+        self.vivo = True
         self.flip = False
         self.animaciones = animaciones
         #imagen de la animacion que se muestra
@@ -34,6 +36,11 @@ class Personaje():
         self.forma.y = self.forma.y + delta_y
 
     def update(self): 
+        #comprobar si el personaje ha muerto
+        if self.energia <= 0:
+            self.energia = 0
+            self.vivo = False
+           
         cooldown_animacion = 100
         self.image = self.animaciones[self.frame_index]   
         if pg.time.get_ticks() - self.update_time >= cooldown_animacion:
