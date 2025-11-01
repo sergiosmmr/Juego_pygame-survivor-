@@ -4,6 +4,9 @@ import personaje as per
 import weapon as wp
 import os
 import texto as tx
+import items as ts
+import mundo as md
+import csv
 
 #######  FUNCIONES  ########
 
@@ -16,7 +19,7 @@ def escalar_img(image, scale):
 
 # funcion para contar elementos
 def contar_elementos (directorio):
-    return len (os.listdir(directorio))
+    return len (os.listdir(directorio)) 
 
 #funcion listar elementos
 def nombre_carpetas(directorio):
@@ -29,9 +32,13 @@ pg.init()
 ventana = pg.display.set_mode((cons.ANCHO_VENTANA, cons.ALTO_VENTANA))
 pg. display.set_caption(cons.NOMBRE_JUEGO)
 
+### variables ####
+posicion_pantalla = [0, 0]
+
+
 ##### FUENTES ######
 font = pg.font.Font("assets/font/Ryga.ttf", cons.TAMANIO_FUENTE_ENEMIGOS)
-
+font_score = pg.font.Font("assets/font/Ryga.ttf", cons.TAMANIO_FUENTE_SCORE)
 
 ##############importar imagenes#############
 
@@ -84,6 +91,29 @@ imagen_arma = escalar_img(imagen_arma, cons.ESCALA_ARMA)
 imagen_bala = pg.image.load(f"assets/images/weapons/bullets/fuego_1.png")
 imagen_bala = escalar_img(imagen_bala, cons.ESCALA_BALA)
 
+#cargar imagenes del mundo
+lista_tile = []
+for x in range(cons.TIPOS_TILES):
+    tile_image = pg.image.load(f"assets/images/tiles/tile_{x+1}.png")
+    tile_image = pg.transform.scale(tile_image, (cons.TAMANIO_TILES, cons.TAMANIO_TILES))
+    lista_tile.append(tile_image)
+
+#cargar imagen de los items
+posion_roja = pg.image.load("assets/images/items/posion/posion.png")
+posion_roja = escalar_img(posion_roja, cons.ESCALA_POSION_ROJA)
+
+monedas_imagen = []
+ruta_imagen = "assets/images/items/moneda"
+numero_monedas_imagen = contar_elementos(ruta_imagen)
+for i in range (numero_monedas_imagen):
+    img = pg.image.load(f"assets/images/items/moneda/moneda_frame_{i+1}.png")
+    img = escalar_img(img, cons.ESCALA_MONEDA)
+    monedas_imagen.append(img)
+
+def dibujar_texto_pantalla(texto, fuente, color, x, y):
+    img = fuente.render (texto, True, color)
+    ventana.blit(img, (x, y))
+
 def vida_jugador():
     corazon_mitad_dibujado = False
     for i in range(5):
@@ -95,17 +125,38 @@ def vida_jugador():
         else: 
             ventana.blit(corazon_vacio, (5+i*50, 5))
 
+world_data = []
+
+for fila in range(cons.FILAS):
+    filas = [7] * cons.COLUMNAS
+    world_data.append(filas)
+
+#cargar el archivo con nivel
+with open("niveles/nivel_prueba_1.csv", newline="") as csv_file:
+    reader = csv.reader(csv_file, delimiter=',')
+    for y, fila in enumerate(reader):
+        for x, tile in enumerate(fila):
+            world_data [y] [x] = int(tile)
+
+
+world = md.Mundo()
+world.procesar_data(world_data, lista_tile)
+
+def dibujar_grid():
+    for x in range(50):
+        pg.draw.line(ventana, cons.COLOR_BLANCO, (x*cons.TAMANIO_TILES, 0), (x*cons.TAMANIO_TILES, cons.ALTO_VENTANA))
+        pg.draw.line(ventana, cons.COLOR_BLANCO, (0, x*cons.TAMANIO_TILES), (cons.ANCHO_VENTANA, x*cons.TAMANIO_TILES))
 
 
 #crear un jugador de la clase personaje en posicion x , y
-jugador = per.Personaje (550, 450, animaciones, 80)
+jugador = per.Personaje (550, 450, animaciones, 80, 1)
 
 #crear un enemigo de la clase personaje
-alien = per.Personaje(400, 300, animacion_enemigos[0], 100)
-dragon = per.Personaje(200, 400, animacion_enemigos[1], 100)
-rana = per.Personaje(900, 600, animacion_enemigos[2], 100)
-rana2 = per.Personaje(500, 300, animacion_enemigos[2], 100)
-dragon2 = per.Personaje(800, 400, animacion_enemigos[1], 100)
+alien = per.Personaje(400, 300, animacion_enemigos[0], 100, 2)
+dragon = per.Personaje(200, 400, animacion_enemigos[1], 100, 2)
+rana = per.Personaje(900, 600, animacion_enemigos[2], 100, 2)
+rana2 = per.Personaje(500, 300, animacion_enemigos[2], 100, 2)
+dragon2 = per.Personaje(800, 400, animacion_enemigos[1], 100, 2)
 
 #crear una lista de enemigos
 lista_enemigos = []
@@ -121,6 +172,13 @@ arma = wp.weapon(imagen_arma, imagen_bala)
 #crear un grupo de sprites
 grupo_damage_text = pg.sprite.Group()
 grupo_balas = pg.sprite.Group()
+grupo_items = pg.sprite.Group()
+
+moneda = ts.Item(380, 60, 0, monedas_imagen)
+posion = ts.Item(650, 155, 1, [posion_roja])
+
+grupo_items.add(moneda)
+grupo_items.add(posion)
 
 #variables de movimiento del jugador
 
@@ -135,14 +193,13 @@ prueba = True
 run = True
 while run:
 
-
-
-
     #que valla a 60 fps
     reloj.tick(cons.FPS)
 
 
     ventana.fill(cons.COLOR_DE_FONDO)
+
+    dibujar_grid()
 
     #calcular movimiento del jugador
     delta_x = 0
@@ -157,10 +214,11 @@ while run:
     if mover_arriba == True:
         delta_y = -cons.VELOCIDAD_PERSONAJE
 
-
-
         #mover al jugador
-    jugador.movimiento(delta_x, delta_y)
+    posicion_pantalla = jugador.movimiento(delta_x, delta_y)
+
+    # actualiza el mapa
+    world.update(posicion_pantalla)
 
     #actualiza estado de jugador
     jugador.update()
@@ -168,7 +226,7 @@ while run:
     #actualiza estado de enemigo
     for ene in lista_enemigos:
         ene.update()
-        print(ene.energia)
+   
     
     #actualiza el esatdo del arma
     bala = arma.update(jugador)
@@ -183,6 +241,12 @@ while run:
 
     # actualizar el daño
     grupo_damage_text.update()
+
+    #actualizar items
+    grupo_items.update(jugador)
+
+    #dibujar mundo
+    world.draw(ventana)
     
 
     #dibujar al jugador
@@ -204,6 +268,10 @@ while run:
 
     #dibujar textos
     grupo_damage_text.draw(ventana)
+    dibujar_texto_pantalla(f"SCORE : {jugador.score}", font_score, cons.COLOR_AMARILLO, cons.POSICION_TEXTO_SCORE_X, cons.POSICION_TEXTO_SCORE_Y)
+
+    #dibujar items
+    grupo_items.draw(ventana)
 
     
     for event in pg.event.get():

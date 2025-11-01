@@ -88,7 +88,7 @@ class Bullets (pg.sprite.Sprite):
         #verificar si hay colicion con enemigos
         for enemigo in lista_enemigos:
             if enemigo.forma.colliderect(self.rect):
-                danio = 15 + random.randint(-7, 7)
+                danio = -  (15 + random.randint(-7, 7))
                 pos_danio = enemigo.forma
                 enemigo.energia -= danio
                 self.kill()
