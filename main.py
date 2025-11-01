@@ -240,8 +240,8 @@ while run:
             grupo_damage_text.add(damage_text)
 
     # actualizar el daño
-    grupo_damage_text.update()
-
+    grupo_damage_text.update(posicion_pantalla)
+    
     #actualizar items
     grupo_items.update(posicion_pantalla, jugador)
 
