@@ -34,6 +34,7 @@ pg. display.set_caption(cons.NOMBRE_JUEGO)
 
 ### variables ####
 posicion_pantalla = [0, 0]
+nivel = 1
 
 
 ##### FUENTES ######
@@ -110,6 +111,8 @@ for i in range (numero_monedas_imagen):
     img = escalar_img(img, cons.ESCALA_MONEDA)
     monedas_imagen.append(img)
 
+item_imagenes = [monedas_imagen, [posion_roja]]
+
 def dibujar_texto_pantalla(texto, fuente, color, x, y):
     img = fuente.render (texto, True, color)
     ventana.blit(img, (x, y))
@@ -132,7 +135,7 @@ for fila in range(cons.FILAS):
     world_data.append(filas)
 
 #cargar el archivo con nivel
-with open("niveles/nivel_prueba_1.csv", newline="") as csv_file:
+with open("niveles/nivel_2_con_items.csv", newline="") as csv_file:
     reader = csv.reader(csv_file, delimiter=',')
     for y, fila in enumerate(reader):
         for x, tile in enumerate(fila):
@@ -140,7 +143,7 @@ with open("niveles/nivel_prueba_1.csv", newline="") as csv_file:
 
 
 world = md.Mundo()
-world.procesar_data(world_data, lista_tile)
+world.procesar_data(world_data, lista_tile, item_imagenes)
 
 def dibujar_grid():
     for x in range(50):
@@ -174,11 +177,15 @@ grupo_damage_text = pg.sprite.Group()
 grupo_balas = pg.sprite.Group()
 grupo_items = pg.sprite.Group()
 
-moneda = ts.Item(380, 60, 0, monedas_imagen)
-posion = ts.Item(650, 155, 1, [posion_roja])
+#añadir items de la data de world
+for item in world.lista_item:
+    grupo_items.add(item)
 
-grupo_items.add(moneda)
-grupo_items.add(posion)
+# moneda = ts.Item(380, 60, 0, monedas_imagen)
+# posion = ts.Item(650, 155, 1, [posion_roja])
+
+# grupo_items.add(moneda)
+# grupo_items.add(posion)
 
 #variables de movimiento del jugador
 
@@ -241,7 +248,7 @@ while run:
 
     # actualizar el daño
     grupo_damage_text.update(posicion_pantalla)
-    
+
     #actualizar items
     grupo_items.update(posicion_pantalla, jugador)
 
@@ -270,6 +277,9 @@ while run:
     #dibujar textos
     grupo_damage_text.draw(ventana)
     dibujar_texto_pantalla(f"SCORE : {jugador.score}", font_score, cons.COLOR_AMARILLO, cons.POSICION_TEXTO_SCORE_X, cons.POSICION_TEXTO_SCORE_Y)
+
+    # nivel
+    dibujar_texto_pantalla(f"N I V E L: " + str(nivel), font, cons.COLOR_BLANCO, cons.ANCHO_VENTANA / 2, 5)
 
     #dibujar items
     grupo_items.draw(ventana)

@@ -39,7 +39,7 @@ def dividir_guardar_imagen(ruta_imagen: str, carpeta_destino: str, divisiones_po
             contador += 1
 
     img.close()
-    print(f"✅ Se guardaron {contador} tiles en '{carpeta_destino}'")
+    #print(f"✅ Se guardaron {contador} tiles en '{carpeta_destino}'")
 
 # Ejemplo de uso
 dividir_guardar_imagen("assets/images/tiles/Dungeon_Tileset.png", "assets/images/tiles", 10)
