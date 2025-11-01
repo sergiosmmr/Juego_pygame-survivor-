@@ -60,8 +60,10 @@ class Personaje():
                 self.forma.top = cons.LIMITES_PANTALLA
             return posicion_pantalla
 
-            
-
+    def enemigos(self, posicion_pantalla):
+        # reposicion de enemigos con el movimiento de pantalla o camara
+        self.forma.x += posicion_pantalla[0]            
+        self.forma.y += posicion_pantalla[1]     
 
     def update(self): 
         #comprobar si el personaje ha muerto
