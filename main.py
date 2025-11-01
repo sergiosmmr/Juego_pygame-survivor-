@@ -243,7 +243,7 @@ while run:
     grupo_damage_text.update()
 
     #actualizar items
-    grupo_items.update(jugador)
+    grupo_items.update(posicion_pantalla, jugador)
 
     #dibujar mundo
     world.draw(ventana)

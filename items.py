@@ -13,7 +13,10 @@ class Item(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         
-    def update(self, personaje):
+    def update(self, posicion_pantalla, personaje):
+        # reposicionar los items segun la pantalla o camara
+        self.rect.x += posicion_pantalla[0]
+        self.rect.y += posicion_pantalla[1]
         #comprobar colision entre el personaje y los items
         if self.rect.colliderect(personaje.forma):
             #si son monedas
