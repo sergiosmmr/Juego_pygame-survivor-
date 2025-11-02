@@ -247,7 +247,7 @@ while run:
 
     #dibujar al enemigo
     for ene in lista_enemigos:
-        ene.enemigos(posicion_pantalla)
+        ene.enemigos(jugador, world.obstaculos_tiles, posicion_pantalla)
         ene.dibujar(ventana)
 
     #dibujar el arma
