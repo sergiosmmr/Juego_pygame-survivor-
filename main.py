@@ -186,8 +186,6 @@ reloj = pg.time.Clock()
 prueba = True
 run = True
 
-last_energies = None  # para loguear solo cuando cambie ############################ BORRAR DESPUES DE ARREGLAR LA ELIMINACION DE ENEMIGO
-
 
 while run:
 
@@ -237,11 +235,6 @@ while run:
             damage_text = tx.Damage_text(post_damage.centerx, post_damage.centery, "-" + str(damage), font, cons.COLOR_ROJO)
             grupo_damage_text.add(damage_text)
 
-    # --- DEBUG: log de energías cuando cambian ########### BORRAR DESPUES DE ARREGLAR LA ELIMINACION DE ENEMIGO
-    energies = [e.energia for e in lista_enemigos]
-    if energies != last_energies:
-        print("Energías enemigos:", energies)
-        last_energies = energies
 
 
     # actualizar el daño
@@ -294,25 +287,25 @@ while run:
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_w:
                 mover_arriba = True
-        if event.type == pg.KEYDOWN:
-            if event.key == pg.K_s:
+            elif event.key == pg.K_s:
                 mover_abajo = True
-        if event.type == pg.KEYDOWN:
-            if event.key == pg.K_d:
+            elif event.key == pg.K_d:
                 mover_derecha = True
-        if event.type == pg.KEYDOWN:
-            if event.key == pg.K_a:
+            elif event.key == pg.K_a:
                 mover_izquierda = True
+            elif event.key == pg.K_e:
+                if world.cambiar_puerta(jugador, lista_tile):
+                    print("puerta cambiada")
 
         #cuando la tecla se suelta
         if event.type == pg.KEYUP:
             if event.key == pg.K_w:
                 mover_arriba = False
-            if event.key == pg.K_s:
+            elif event.key == pg.K_s:
                 mover_abajo = False
-            if event.key == pg.K_d:
+            elif event.key == pg.K_d:
                 mover_derecha = False
-            if event.key == pg.K_a:
+            elif event.key == pg.K_a:
                 mover_izquierda = False
 
         

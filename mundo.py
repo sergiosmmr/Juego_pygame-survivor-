@@ -3,7 +3,8 @@ import constantes_varaibles as cons
 import items as itm
 import personaje as per
 
-obstaculos = [0, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 35, 40, 41, 42, 43, 44, 45, 50, 51, 52, 53, 54, 55, 66, 67]
+obstaculos = [0, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 35, 40, 41, 42, 43, 44, 45, 50, 51, 52, 53, 54, 55,]
+puertas_cerradas = [36, 37, 66, 67]
 class Mundo():
     def __init__(self):
         self.maps_tile = []
@@ -11,6 +12,7 @@ class Mundo():
         self.exit_tile = None
         self.lista_item = []
         self.lista_enemigo = []
+        self.puertas_cerradas_tiles = []
 
     def procesar_data (self, data, lista_tile, item_imagenes, animacion_enemigos):
         self.level_lenght = len(data)
@@ -22,11 +24,15 @@ class Mundo():
                 image_x = x * cons.TAMANIO_TILES
                 image_y = y * cons.TAMANIO_TILES
                 image_rect.center = (image_x, image_y)
-                tile_data = [image, image_rect, image_x, image_y]
+                tile_data = [image, image_rect, image_x, image_y, tile]
 
                 #agregarr los tiles de obstaculos
                 if tile in obstaculos:
                     self.obstaculos_tiles.append(tile_data)
+                #tiles de puertas
+                if tile in puertas_cerradas:
+                    self.obstaculos_tiles.append(tile_data)
+
                 elif tile == 36 or tile == 37:
                     self.exit_tile = tile_data
                     #crear moneda
@@ -56,6 +62,28 @@ class Mundo():
                     tile_data [0] = lista_tile [22]
 
                 self.maps_tile.append(tile_data)
+
+    def cambiar_puerta (self, jugador, lista_tile):
+        buffer = 50
+        proximidad_rect = pg.Rect(jugador.forma.x - buffer, jugador.forma.y - buffer, jugador.forma.width + 2 * buffer, jugador.forma.height + 2 * buffer)
+        for tile_data in self.maps_tile:
+            image, rect, x, y, tile_type = tile_data
+            if proximidad_rect.colliderect(rect):
+                if tile_type in puertas_cerradas:
+                    if tile_type == 36 or tile_type == 66:
+                        new_tile_type = 57
+                    elif tile_type == 37 or tile_type == 67:
+                        new_tile_type = 58
+
+                    tile_data[-1] = new_tile_type
+                    tile_data[0] = lista_tile[new_tile_type]
+
+                    #eliminar el tile de las lista de colisiones
+                    if tile_data in self.obstaculos_tiles:
+                        self.obstaculos_tiles.remove(tile_data)
+
+                    return True
+        return False        
 
     def update(self, posicion_pantalla):
         for tile in self.maps_tile:
