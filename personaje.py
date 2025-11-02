@@ -78,6 +78,7 @@ class Personaje():
             return posicion_pantalla
 
     def enemigos(self, jugador, obstaculos_tiles, posicion_pantalla):
+        clipped_line = ()
         ene_dx = 0
         ene_dy = 0
 
@@ -85,9 +86,17 @@ class Personaje():
         self.forma.x += posicion_pantalla[0]            
         self.forma.y += posicion_pantalla[1]   
 
+        # crear una linea de vision
+        linea_de_vision = ((self.forma.centerx, self.forma.centery), (jugador.forma.centerx, jugador.forma.centery))
+
+        # chequear si hay obstaculos en la linea de vision de enemigo
+        for obs in obstaculos_tiles:
+            if obs[1].clipline(linea_de_vision):
+                clipped_line = obs[1].clipline(linea_de_vision) 
+
         # distancia con el jugador
         distancia =  math.sqrt(((self.forma.centerx - jugador.forma.centerx)**2) + ((self.forma.centery - jugador.forma.centery)**2))
-        if distancia < cons.RANGO:
+        if not clipped_line and distancia < cons.RANGO:
                 
             if self.forma.centerx > jugador.forma.centerx:
                 ene_dx = -cons.VELOCIDAD_ENEMIGOS
