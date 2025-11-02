@@ -29,6 +29,8 @@ class Personaje():
         # posiciona el centro del rectángulo en las coordenadas (x, y)
         self.forma.center = (x, y)
         self.tipo = tipo
+        self.golpe = False
+        self.ultimo_golpe = pg.time.get_ticks()
 
     def movimiento (self, delta_x, delta_y, osbtaculos_tile):
         posicion_pantalla = [0, 0]
@@ -96,7 +98,7 @@ class Personaje():
 
         # distancia con el jugador
         distancia =  math.sqrt(((self.forma.centerx - jugador.forma.centerx)**2) + ((self.forma.centery - jugador.forma.centery)**2))
-        if not clipped_line and distancia < cons.RANGO:
+        if not clipped_line and distancia < cons.RANGO_PERSECUCION:
                 
             if self.forma.centerx > jugador.forma.centerx:
                 ene_dx = -cons.VELOCIDAD_ENEMIGOS
@@ -110,11 +112,24 @@ class Personaje():
 
         self.movimiento(ene_dx, ene_dy, obstaculos_tiles)
 
+        # atacar al jugador
+        if distancia < cons.RANGO_ATAQUE and jugador.golpe == False:
+            jugador.energia -= 10
+            jugador.golpe = True
+            jugador.ultimo_golpe = pg.time.get_ticks()
+
     def update(self): 
         #comprobar si el personaje ha muerto
         if self.energia <= 0:
             self.energia = 0
             self.vivo = False
+        # timer para poder volver a recibir daño
+        golpe_cooldown = 1000
+        if self.tipo == 1:
+            if self.golpe == True:
+                if pg.time.get_ticks() - self.ultimo_golpe > golpe_cooldown:
+                    self.golpe = False
+                    
            
         cooldown_animacion = 100
         self.image = self.animaciones[self.frame_index]   

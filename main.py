@@ -127,6 +127,7 @@ def vida_jugador():
             corazon_mitad_dibujado = True
         else: 
             ventana.blit(corazon_vacio, (5+i*50, 5))
+           
 
 world_data = []
 
