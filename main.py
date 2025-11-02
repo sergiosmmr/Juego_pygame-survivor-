@@ -122,7 +122,7 @@ def vida_jugador():
     for i in range(5):
         if jugador.energia >= ((i+1)*20):
             ventana.blit(corazon_lleno, (5+i*50, 5))
-        elif jugador.energia % 20 >= 0 and not corazon_mitad_dibujado:
+        elif jugador.energia % 20 > 0 and not corazon_mitad_dibujado:
             ventana.blit(corazon_medio, (5+i*50, 5))
             corazon_mitad_dibujado = True
         else: 
