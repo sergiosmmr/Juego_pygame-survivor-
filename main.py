@@ -135,15 +135,15 @@ for fila in range(cons.FILAS):
     world_data.append(filas)
 
 #cargar el archivo con nivel
-with open("niveles/nivel_2_con_items.csv", newline="") as csv_file:
+with open("niveles/nivel_2_con_items2.csv", newline="") as csv_file:
     reader = csv.reader(csv_file, delimiter=',')
     for y, fila in enumerate(reader):
         for x, tile in enumerate(fila):
             world_data [y] [x] = int(tile)
 
-
+ 
 world = md.Mundo()
-world.procesar_data(world_data, lista_tile, item_imagenes)
+world.procesar_data(world_data, lista_tile, item_imagenes, animacion_enemigos)
 
 def dibujar_grid():
     for x in range(50):
@@ -154,20 +154,10 @@ def dibujar_grid():
 #crear un jugador de la clase personaje en posicion x , y
 jugador = per.Personaje (550, 450, animaciones, 80, 1)
 
-#crear un enemigo de la clase personaje
-alien = per.Personaje(400, 300, animacion_enemigos[0], 100, 2)
-dragon = per.Personaje(200, 400, animacion_enemigos[1], 100, 2)
-rana = per.Personaje(900, 600, animacion_enemigos[2], 100, 2)
-rana2 = per.Personaje(500, 300, animacion_enemigos[2], 100, 2)
-dragon2 = per.Personaje(800, 400, animacion_enemigos[1], 100, 2)
-
 #crear una lista de enemigos
 lista_enemigos = []
-lista_enemigos.append(alien)
-lista_enemigos.append(dragon)
-lista_enemigos.append(rana)
-lista_enemigos.append(rana2)
-lista_enemigos.append(dragon2)
+for ene in world.lista_enemigo:
+    lista_enemigos.append(ene)
 
 #crear un arma de la clase weapon centrada en jugador
 arma = wp.weapon(imagen_arma, imagen_bala)
@@ -181,11 +171,7 @@ grupo_items = pg.sprite.Group()
 for item in world.lista_item:
     grupo_items.add(item)
 
-# moneda = ts.Item(380, 60, 0, monedas_imagen)
-# posion = ts.Item(650, 155, 1, [posion_roja])
 
-# grupo_items.add(moneda)
-# grupo_items.add(posion)
 
 #variables de movimiento del jugador
 
@@ -222,7 +208,7 @@ while run:
         delta_y = -cons.VELOCIDAD_PERSONAJE
 
         #mover al jugador
-    posicion_pantalla = jugador.movimiento(delta_x, delta_y)
+    posicion_pantalla = jugador.movimiento(delta_x, delta_y, world.obstaculos_tiles)
 
     # actualiza el mapa
     world.update(posicion_pantalla)

@@ -1,16 +1,18 @@
 import pygame as pg
 import constantes_varaibles as cons
 import items as itm
+import personaje as per
 
 obstaculos = [0, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 35, 40, 41, 42, 43, 44, 45, 50, 51, 52, 53, 54, 55, 66, 67]
 class Mundo():
     def __init__(self):
         self.maps_tile = []
-        self.obstaculos_tiles = obstaculos
+        self.obstaculos_tiles = []
         self.exit_tile = None
         self.lista_item = []
+        self.lista_enemigo = []
 
-    def procesar_data (self, data, lista_tile, item_imagenes):
+    def procesar_data (self, data, lista_tile, item_imagenes, animacion_enemigos):
         self.level_lenght = len(data)
         for y, row in enumerate (data):
             for x, tile in enumerate(row):
@@ -27,13 +29,30 @@ class Mundo():
                     self.obstaculos_tiles.append(tile_data)
                 elif tile == 36 or tile == 37:
                     self.exit_tile = tile_data
+                    #crear moneda
                 elif tile == 86:
                     moneda = itm.Item(image_x, image_y, 0, item_imagenes[0])
                     self.lista_item.append(moneda)
                     tile_data [0] = lista_tile [22]
+                    # crear posiones
                 elif tile == 89:
                     posion = itm.Item(image_x, image_y, 1, item_imagenes[1])
                     self.lista_item.append(posion)
+                    tile_data [0] = lista_tile [22]
+                    #crear sapo
+                elif tile == 90:
+                    sapo = per.Personaje(image_x, image_y, animacion_enemigos [0], 80, 2)
+                    self.lista_enemigo.append(sapo)
+                    tile_data [0] = lista_tile [22]
+                    #crear mosca
+                elif tile == 91:
+                    mosca = per.Personaje(image_x, image_y, animacion_enemigos [1], 110, 2)
+                    self.lista_enemigo.append(mosca)
+                    tile_data [0] = lista_tile [22]
+                    # crear dragon
+                elif tile == 92:
+                    dragon = per.Personaje(image_x, image_y, animacion_enemigos [2], 150, 2)
+                    self.lista_enemigo.append(dragon)
                     tile_data [0] = lista_tile [22]
 
                 self.maps_tile.append(tile_data)

@@ -29,14 +29,30 @@ class Personaje():
         self.forma.center = (x, y)
         self.tipo = tipo
 
-    def movimiento (self, delta_x, delta_y):
+    def movimiento (self, delta_x, delta_y, osbtaculos_tile):
         posicion_pantalla = [0, 0]
         if delta_x < 0:
             self.flip = True
         if delta_x > 0:
             self.flip = False
+ 
         self.forma.x = self.forma.x + delta_x
+
+        for obstacle in osbtaculos_tile:
+            if obstacle[1].colliderect(self.forma):
+                if delta_x > 0:
+                    self.forma.right = obstacle[1].left
+                if delta_x < 0:
+                    self.forma.left = obstacle[1].right
+
         self.forma.y = self.forma.y + delta_y
+        
+        for obstacle in osbtaculos_tile:
+            if obstacle[1].colliderect(self.forma):
+                if delta_y > 0:
+                    self.forma.bottom = obstacle[1].top
+                if delta_y < 0:
+                    self.forma.top = obstacle[1].bottom
 
         #logica, solo aplica al jugador y no a los enemisgos
         if self.tipo == 1:
