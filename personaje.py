@@ -32,8 +32,13 @@ class Personaje():
         self.golpe = False
         self.ultimo_golpe = pg.time.get_ticks()
 
-    def movimiento (self, delta_x, delta_y, osbtaculos_tile):
+    def actualizar_coordenadas (self, tupla):
+        self.forma.center = (tupla[0], tupla[1])
+        
+
+    def movimiento (self, delta_x, delta_y, osbtaculos_tile, exit_tile):
         posicion_pantalla = [0, 0]
+        nivel_completo = False
         if delta_x < 0:
             self.flip = True
         if delta_x > 0:
@@ -59,6 +64,9 @@ class Personaje():
 
         #logica, solo aplica al jugador y no a los enemisgos
         if self.tipo == 1:
+            if exit_tile[1].colliderect(self.forma):   
+                nivel_completo = True
+
             #actualiza la pantalla segun estado del jugador
             #mover pantalla izquierda o derecha
             if self.forma.right > (cons. ANCHO_VENTANA - cons.LIMITES_PANTALLA):
@@ -77,9 +85,9 @@ class Personaje():
             if self.forma.top < cons.LIMITES_PANTALLA:
                 posicion_pantalla [1] = cons.LIMITES_PANTALLA - self.forma.top
                 self.forma.top = cons.LIMITES_PANTALLA
-            return posicion_pantalla
+            return posicion_pantalla, nivel_completo
 
-    def enemigos(self, jugador, obstaculos_tiles, posicion_pantalla):
+    def enemigos(self, jugador, obstaculos_tiles, posicion_pantalla, exit_tile):
         clipped_line = ()
         ene_dx = 0
         ene_dy = 0
@@ -110,7 +118,7 @@ class Personaje():
                 ene_dy = cons.VELOCIDAD_ENEMIGOS
             
 
-        self.movimiento(ene_dx, ene_dy, obstaculos_tiles)
+        self.movimiento(ene_dx, ene_dy, obstaculos_tiles, exit_tile)
 
         # atacar al jugador
         if distancia < cons.RANGO_ATAQUE and jugador.golpe == False:

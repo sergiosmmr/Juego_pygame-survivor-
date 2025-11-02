@@ -33,7 +33,8 @@ class Mundo():
                 if tile in puertas_cerradas:
                     self.obstaculos_tiles.append(tile_data)
 
-                elif tile == 36 or tile == 37:
+                #tile de salida
+                elif tile == 84:
                     self.exit_tile = tile_data
                     #crear moneda
                 elif tile == 86:
@@ -62,6 +63,10 @@ class Mundo():
                     tile_data [0] = lista_tile [22]
 
                 self.maps_tile.append(tile_data)
+        # al final de procesar_data ########################### BORRAR DESPUES DEL DEBUGUEO ##############
+        t84 = sum(1 for _,_,_,_,tt in self.maps_tile if tt == 84)
+        print(f"[DEBUG mundo] tiles 84 en mapa: {t84}  | exit_tile seteado: {self.exit_tile is not None}")
+
 
     def cambiar_puerta (self, jugador, lista_tile):
         buffer = 50

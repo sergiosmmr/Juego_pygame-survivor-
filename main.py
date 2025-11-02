@@ -36,7 +36,6 @@ pg. display.set_caption(cons.NOMBRE_JUEGO)
 posicion_pantalla = [0, 0]
 nivel = 1
 
-
 ##### FUENTES ######
 font = pg.font.Font("assets/font/Ryga.ttf", cons.TAMANIO_FUENTE_ENEMIGOS)
 font_score = pg.font.Font("assets/font/Ryga.ttf", cons.TAMANIO_FUENTE_SCORE)
@@ -127,7 +126,17 @@ def vida_jugador():
             corazon_mitad_dibujado = True
         else: 
             ventana.blit(corazon_vacio, (5+i*50, 5))
-           
+
+def resetear_mundo():
+    grupo_damage_text.empty()
+    grupo_balas.empty()
+    grupo_items.empty()
+    # crear una lista de tile vacias
+    data = []
+    for fila in range (cons.FILAS):
+        filas = [2] * cons.COLUMNAS
+        data.append(filas)
+    return data
 
 world_data = []
 
@@ -136,13 +145,11 @@ for fila in range(cons.FILAS):
     world_data.append(filas)
 
 #cargar el archivo con nivel
-with open("niveles/nivel_2_con_items2.csv", newline="") as csv_file:
+with open("niveles/nivel_1.csv", newline="") as csv_file:
     reader = csv.reader(csv_file, delimiter=',')
-    for y, fila in enumerate(reader):
-        for x, tile in enumerate(fila):
-            world_data [y] [x] = int(tile)
-
- 
+    for x, fila in enumerate(reader):
+        for y, columna in enumerate(fila):
+            world_data [x] [y] = int(columna)
 world = md.Mundo()
 world.procesar_data(world_data, lista_tile, item_imagenes, animacion_enemigos) 
 
@@ -193,9 +200,8 @@ while run:
     reloj.tick(cons.FPS)
 
 
-    ventana.fill(cons.COLOR_DE_FONDO)
+    ventana.fill(cons.COLOR_SUELO)
 
-    dibujar_grid()
 
     #calcular movimiento del jugador
     delta_x = 0
@@ -211,7 +217,7 @@ while run:
         delta_y = -cons.VELOCIDAD_PERSONAJE
 
         #mover al jugador
-    posicion_pantalla = jugador.movimiento(delta_x, delta_y, world.obstaculos_tiles)
+    posicion_pantalla, nivel_completo = jugador.movimiento(delta_x, delta_y, world.obstaculos_tiles, world.exit_tile)
 
     # actualiza el mapa
     world.update(posicion_pantalla)
@@ -246,7 +252,6 @@ while run:
     #dibujar mundo
     world.draw(ventana)
     
-
     #dibujar al jugador
     jugador.dibujar(ventana)
     
@@ -256,7 +261,7 @@ while run:
         if ene.energia <= 0:
             lista_enemigos.remove(ene)
         else:
-            ene.enemigos(jugador, world.obstaculos_tiles, posicion_pantalla)
+            ene.enemigos(jugador, world.obstaculos_tiles, posicion_pantalla, world.exit_tile)
             ene.dibujar(ventana)
            
     #dibujar el arma
@@ -278,6 +283,34 @@ while run:
 
     #dibujar items
     grupo_items.draw(ventana)
+
+    # chuequear si el nivel esta completo
+    if nivel_completo:
+        if nivel < cons.NIVEL_MAXIMO:
+                
+            nivel += 1
+            world_data = resetear_mundo()
+            
+            #cargar el archivo con nivel
+            with open(f"niveles/nivel_{nivel}.csv", newline="") as csv_file:
+                reader = csv.reader(csv_file, delimiter=',')
+                for x, fila in enumerate(reader):
+                    for y, columna in enumerate(fila):
+                        world_data [x] [y] = int(columna)
+            world = md.Mundo()
+            world.procesar_data(world_data, lista_tile, item_imagenes, animacion_enemigos) 
+            jugador.actualizar_coordenadas(cons.COORDENADAS_ENEMIGO_NIVEL[str(nivel)])
+            #crear una lista de enemigos######################### tratar de hacer una funcion, mejorar##############
+            lista_enemigos = []
+            for ene in world.lista_enemigo:
+                lista_enemigos.append(ene)
+            #añadir items de la data de world ######################### tratar de hacer una funcion, mejorar##############
+            for item in world.lista_item:
+                grupo_items.add(item)
+
+   
+
+
 
     
     for event in pg.event.get():
