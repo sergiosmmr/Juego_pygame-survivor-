@@ -232,7 +232,7 @@ while run:
     if bala:
         grupo_balas.add(bala)
     for bala in grupo_balas:
-        damage, post_damage = bala.update(lista_enemigos)    
+        damage, post_damage = bala.update(lista_enemigos, world.obstaculos_tiles)    
         if damage:
             damage_text = tx.Damage_text(post_damage.centerx, post_damage.centery, "-" + str(damage), font, cons.COLOR_ROJO)
             grupo_damage_text.add(damage_text)

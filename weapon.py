@@ -75,7 +75,8 @@ class Bullets (pg.sprite.Sprite):
         self.delta_x = math.cos(math.radians(self.angulo))*cons.VELOCIDAD_BALAS
         self.delta_y = - math.sin(math.radians(self.angulo))*cons.VELOCIDAD_BALAS    
 
-    def update(self, lista_enemigos):
+    def update(self, lista_enemigos, obstaculos_tiles):
+
         danio = 0
         pos_danio = None
         self.rect.x += self.delta_x
@@ -93,6 +94,11 @@ class Bullets (pg.sprite.Sprite):
                 enemigo.energia -= danio
                 self.kill()
                 break
+        #verificar si hay colicion con enemigos
+        for obs in obstaculos_tiles:
+            if obs[1].colliderect(self.rect):
+                self.kill()
+                break    
     
         return danio, pos_danio
 
