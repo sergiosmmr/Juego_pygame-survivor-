@@ -60,8 +60,8 @@ for i in range(7):
 
 directorio_enemigos = ("assets/images/characters/enemigos") 
 tipo_enemigos = nombre_carpetas(directorio_enemigos)
-animacion_enemigos = []
 
+animacion_enemigos = []
 for eni in tipo_enemigos:
     lista_temporal = []
     ruta_temporal = f"assets/images/characters/enemigos/{eni}" 
@@ -144,7 +144,7 @@ with open("niveles/nivel_2_con_items2.csv", newline="") as csv_file:
 
  
 world = md.Mundo()
-world.procesar_data(world_data, lista_tile, item_imagenes, animacion_enemigos)
+world.procesar_data(world_data, lista_tile, item_imagenes, animacion_enemigos) 
 
 def dibujar_grid():
     for x in range(50):
@@ -185,6 +185,10 @@ mover_izquierda = False
 reloj = pg.time.Clock()
 prueba = True
 run = True
+
+last_energies = None  # para loguear solo cuando cambie ############################ BORRAR DESPUES DE ARREGLAR LA ELIMINACION DE ENEMIGO
+
+
 while run:
 
     #que valla a 60 fps
@@ -230,8 +234,15 @@ while run:
     for bala in grupo_balas:
         damage, post_damage = bala.update(lista_enemigos)    
         if damage:
-            damage_text = tx.Damage_text(post_damage.centerx, post_damage.centery, str(damage), font, cons.COLOR_ROJO)
+            damage_text = tx.Damage_text(post_damage.centerx, post_damage.centery, "-" + str(damage), font, cons.COLOR_ROJO)
             grupo_damage_text.add(damage_text)
+
+    # --- DEBUG: log de energías cuando cambian ########### BORRAR DESPUES DE ARREGLAR LA ELIMINACION DE ENEMIGO
+    energies = [e.energia for e in lista_enemigos]
+    if energies != last_energies:
+        print("Energías enemigos:", energies)
+        last_energies = energies
+
 
     # actualizar el daño
     grupo_damage_text.update(posicion_pantalla)
@@ -245,12 +256,16 @@ while run:
 
     #dibujar al jugador
     jugador.dibujar(ventana)
-
+    
     #dibujar al enemigo
-    for ene in lista_enemigos:
-        ene.enemigos(jugador, world.obstaculos_tiles, posicion_pantalla)
-        ene.dibujar(ventana)
 
+    for ene in lista_enemigos:
+        if ene.energia <= 0:
+            lista_enemigos.remove(ene)
+        else:
+            ene.enemigos(jugador, world.obstaculos_tiles, posicion_pantalla)
+            ene.dibujar(ventana)
+           
     #dibujar el arma
     arma.dibujar(ventana)
 
