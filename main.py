@@ -39,6 +39,11 @@ nivel = 1
 ##### FUENTES ######
 font = pg.font.Font("assets/font/Ryga.ttf", cons.TAMANIO_FUENTE_ENEMIGOS)
 font_score = pg.font.Font("assets/font/Ryga.ttf", cons.TAMANIO_FUENTE_SCORE)
+font_game_over = pg.font.Font("assets/font/Colorfiction - Gothic - Regular.otf", 110)
+font_reinicio = pg.font.Font("assets/font/Colorfiction - Gothic - Regular.otf", 30)
+
+game_over_text = font_game_over.render("GAME OVER", True, cons.COLOR_BLANCO)
+texto_boton_reinicio = font_reinicio.render("Reiniciar", True, cons.COLOR_NEGRO)
 
 ##############importar imagenes#############
 
@@ -160,7 +165,7 @@ def dibujar_grid():
 
 
 #crear un jugador de la clase personaje en posicion x , y
-jugador = per.Personaje (550, 450, animaciones, 80, 1)
+jugador = per.Personaje (80, 80, animaciones, 80, 1)
 
 #crear una lista de enemigos
 lista_enemigos = []
@@ -202,52 +207,55 @@ while run:
 
     ventana.fill(cons.COLOR_SUELO)
 
+    if jugador.vivo:
 
-    #calcular movimiento del jugador
-    delta_x = 0
-    delta_y = 0
 
-    if mover_derecha == True:
-        delta_x = cons.VELOCIDAD_PERSONAJE
-    if mover_izquierda == True:
-        delta_x = -cons.VELOCIDAD_PERSONAJE
-    if mover_abajo == True:
-        delta_y = cons.VELOCIDAD_PERSONAJE
-    if mover_arriba == True:
-        delta_y = -cons.VELOCIDAD_PERSONAJE
 
-        #mover al jugador
-    posicion_pantalla, nivel_completo = jugador.movimiento(delta_x, delta_y, world.obstaculos_tiles, world.exit_tile)
+        #calcular movimiento del jugador
+        delta_x = 0
+        delta_y = 0
 
-    # actualiza el mapa
-    world.update(posicion_pantalla)
+        if mover_derecha == True:
+            delta_x = cons.VELOCIDAD_PERSONAJE
+        if mover_izquierda == True:
+            delta_x = -cons.VELOCIDAD_PERSONAJE
+        if mover_abajo == True:
+            delta_y = cons.VELOCIDAD_PERSONAJE
+        if mover_arriba == True:
+            delta_y = -cons.VELOCIDAD_PERSONAJE
 
-    #actualiza estado de jugador
-    jugador.update()
+            #mover al jugador
+        posicion_pantalla, nivel_completo = jugador.movimiento(delta_x, delta_y, world.obstaculos_tiles, world.exit_tile)
 
-    #actualiza estado de enemigo
-    for ene in lista_enemigos:
-        ene.update()
-   
+        # actualiza el mapa
+        world.update(posicion_pantalla)
+
+        #actualiza estado de jugador
+        jugador.update()
+
+        #actualiza estado de enemigo
+        for ene in lista_enemigos:
+            ene.update()
     
-    #actualiza el esatdo del arma
-    bala = arma.update(jugador)
+        
+        #actualiza el esatdo del arma
+        bala = arma.update(jugador)
 
-    if bala:
-        grupo_balas.add(bala)
-    for bala in grupo_balas:
-        damage, post_damage = bala.update(lista_enemigos, world.obstaculos_tiles)    
-        if damage:
-            damage_text = tx.Damage_text(post_damage.centerx, post_damage.centery, "-" + str(damage), font, cons.COLOR_ROJO)
-            grupo_damage_text.add(damage_text)
+        if bala:
+            grupo_balas.add(bala)
+        for bala in grupo_balas:
+            damage, post_damage = bala.update(lista_enemigos, world.obstaculos_tiles)    
+            if damage:
+                damage_text = tx.Damage_text(post_damage.centerx, post_damage.centery, "-" + str(damage), font, cons.COLOR_ROJO)
+                grupo_damage_text.add(damage_text)
 
 
 
-    # actualizar el daño
-    grupo_damage_text.update(posicion_pantalla)
+        # actualizar el daño
+        grupo_damage_text.update(posicion_pantalla)
 
-    #actualizar items
-    grupo_items.update(posicion_pantalla, jugador)
+        #actualizar items
+        grupo_items.update(posicion_pantalla, jugador)
 
     #dibujar mundo
     world.draw(ventana)
@@ -308,10 +316,15 @@ while run:
             for item in world.lista_item:
                 grupo_items.add(item)
 
-   
+    if not jugador.vivo:
+        ventana.fill(cons.ROJO_OSCURO)
+        text_rect = game_over_text.get_rect(center = (cons.ANCHO_VENTANA/2, cons.ALTO_VENTANA/2))
 
-
-
+        ventana.blit(game_over_text, text_rect)
+        # boton de reinicio
+        boton_reinicio = pg.Rect(cons.ANCHO_VENTANA/2 - 100, cons.ALTO_VENTANA/2 + 150, 200, 50)
+        pg.draw.rect(ventana, cons.COLOR_BLANCO, boton_reinicio)
+        ventana.blit(texto_boton_reinicio, (boton_reinicio.x + 50, boton_reinicio.y + 10))
     
     for event in pg.event.get():
         if event.type == pg.QUIT:
@@ -340,6 +353,34 @@ while run:
                 mover_derecha = False
             elif event.key == pg.K_a:
                 mover_izquierda = False
+        if event.type == pg.MOUSEBUTTONDOWN:
+            if boton_reinicio.collidepoint(event.pos) and not jugador.vivo:
+                #################################### optimizar con funcion ####################################
+                jugador.vivo = True
+                jugador.energia = 100
+                jugador.score = 0
+                nivel = 1
+                world_data = resetear_mundo()
+                    #cargar el archivo con nivel
+                with open(f"niveles/nivel_{nivel}.csv", newline="") as csv_file:
+                    reader = csv.reader(csv_file, delimiter=',')
+                    for x, fila in enumerate(reader):
+                        for y, columna in enumerate(fila):
+                                world_data [x] [y] = int(columna)
+                world = md.Mundo()
+                world.procesar_data(world_data, lista_tile, item_imagenes, animacion_enemigos) 
+                jugador.actualizar_coordenadas(cons.COORDENADAS_ENEMIGO_NIVEL[str(nivel)])
+
+                  #añadir items de la data de world ################# tratar de hacer una funcion, mejorar##############
+                for item in world.lista_item:
+                    grupo_items.add(item)
+                #crear una lista de enemigos################### tratar de hacer una funcion, mejorar##############
+                lista_enemigos = []
+                for ene in world.lista_enemigo:
+                    lista_enemigos.append(ene)
+                
+
+
 
         
         

@@ -31,6 +31,8 @@ COLOR_ROJO = (255, 0, 0)
 COLOR_DE_FONDO = (0, 0, 20)
 COLOR_ARMA = (255,200,0)
 COLOR_SUELO = (61, 37, 59) 
+ROJO_OSCURO = (139, 0, 0)
+COLOR_NEGRO = (0, 0, 0)
 
 
 ####### OTROS #######
