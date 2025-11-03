@@ -39,11 +39,31 @@ nivel = 1
 ##### FUENTES ######
 font = pg.font.Font("assets/font/Ryga.ttf", cons.TAMANIO_FUENTE_ENEMIGOS)
 font_score = pg.font.Font("assets/font/Ryga.ttf", cons.TAMANIO_FUENTE_SCORE)
+
 font_game_over = pg.font.Font("assets/font/Colorfiction - Gothic - Regular.otf", 110)
 font_reinicio = pg.font.Font("assets/font/Colorfiction - Gothic - Regular.otf", 30)
 
+font_inicio = pg.font.Font("assets/font/Colorfiction - Gothic - Regular.otf", 30)
+font_titulo = pg.font.Font("assets/font/Colorfiction - Gothic - Regular.otf", 80)
+
 game_over_text = font_game_over.render("GAME OVER", True, cons.COLOR_BLANCO)
 texto_boton_reinicio = font_reinicio.render("Reiniciar", True, cons.COLOR_NEGRO)
+
+# botones de inicio
+boton_jugar = pg.Rect(cons.ANCHO_VENTANA/2 -100, cons.ALTO_VENTANA/2 -50, 200, 50)
+boton_salir = pg.Rect(cons.ANCHO_VENTANA/2 -100, cons.ALTO_VENTANA/2 +50, 200, 50)
+texto_boton_jugar = font_inicio.render("JUGAR", True, cons.COLOR_NEGRO)
+texto_boton_salir = font_inicio.render("SALIR", True, cons.COLOR_BLANCO)
+
+# pantalla de inicio
+def pantalla_inicio():
+    ventana.fill(cons.COLOR_SUELO)
+    dibujar_texto_pantalla ("Mi primer juego SURVIVOR", font_titulo, cons.COLOR_BLANCO, cons.ANCHO_VENTANA/2 -200, cons.ALTO_VENTANA/2 -200)
+    pg.draw.rect(ventana, cons.COLOR_AMARILLO, boton_jugar)
+    pg.draw.rect(ventana, cons.COLOR_ROJO, boton_salir)
+    ventana.blit(texto_boton_jugar, (boton_jugar.x + 50, boton_jugar.y + 10))
+    ventana.blit(texto_boton_salir, (boton_salir.x + 50, boton_salir.y + 10))
+    pg.display.update()
 
 ##############importar imagenes#############
 
@@ -197,196 +217,202 @@ mover_izquierda = False
 reloj = pg.time.Clock()
 prueba = True
 run = True
-
+mostrar_inicio = True
 
 while run:
+    if mostrar_inicio:
+        pantalla_inicio()
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                run = False
+            if event.type == pg.MOUSEBUTTONDOWN:
+                if boton_jugar.collidepoint(event.pos):
+                    mostrar_inicio = False
+                if boton_salir.collidepoint(event.pos):
+                    run = False
 
-    #que valla a 60 fps
-    reloj.tick(cons.FPS)
-
-
-    ventana.fill(cons.COLOR_SUELO)
-
-    if jugador.vivo:
-
-
-
-        #calcular movimiento del jugador
-        delta_x = 0
-        delta_y = 0
-
-        if mover_derecha == True:
-            delta_x = cons.VELOCIDAD_PERSONAJE
-        if mover_izquierda == True:
-            delta_x = -cons.VELOCIDAD_PERSONAJE
-        if mover_abajo == True:
-            delta_y = cons.VELOCIDAD_PERSONAJE
-        if mover_arriba == True:
-            delta_y = -cons.VELOCIDAD_PERSONAJE
-
-            #mover al jugador
-        posicion_pantalla, nivel_completo = jugador.movimiento(delta_x, delta_y, world.obstaculos_tiles, world.exit_tile)
-
-        # actualiza el mapa
-        world.update(posicion_pantalla)
-
-        #actualiza estado de jugador
-        jugador.update()
-
-        #actualiza estado de enemigo
-        for ene in lista_enemigos:
-            ene.update()
-    
-        
-        #actualiza el esatdo del arma
-        bala = arma.update(jugador)
-
-        if bala:
-            grupo_balas.add(bala)
-        for bala in grupo_balas:
-            damage, post_damage = bala.update(lista_enemigos, world.obstaculos_tiles)    
-            if damage:
-                damage_text = tx.Damage_text(post_damage.centerx, post_damage.centery, "-" + str(damage), font, cons.COLOR_ROJO)
-                grupo_damage_text.add(damage_text)
-
-
-
-        # actualizar el daño
-        grupo_damage_text.update(posicion_pantalla)
-
-        #actualizar items
-        grupo_items.update(posicion_pantalla, jugador)
-
-    #dibujar mundo
-    world.draw(ventana)
-    
-    #dibujar al jugador
-    jugador.dibujar(ventana)
-    
-    #dibujar al enemigo
-
-    for ene in lista_enemigos:
-        if ene.energia <= 0:
-            lista_enemigos.remove(ene)
-        else:
-            ene.enemigos(jugador, world.obstaculos_tiles, posicion_pantalla, world.exit_tile)
-            ene.dibujar(ventana)
-           
-    #dibujar el arma
-    arma.dibujar(ventana)
-
-    #dibujar balas
-    for bala in grupo_balas:
-        bala.dibujar(ventana)
-
-    #dibujar corazones
-    vida_jugador()
-
-    #dibujar textos
-    grupo_damage_text.draw(ventana)
-    dibujar_texto_pantalla(f"SCORE : {jugador.score}", font_score, cons.COLOR_AMARILLO, cons.POSICION_TEXTO_SCORE_X, cons.POSICION_TEXTO_SCORE_Y)
-
-    # nivel
-    dibujar_texto_pantalla(f"N I V E L: " + str(nivel), font, cons.COLOR_BLANCO, cons.ANCHO_VENTANA / 2, 5)
-
-    #dibujar items
-    grupo_items.draw(ventana)
-
-    # chuequear si el nivel esta completo
-    if nivel_completo:
-        if nivel < cons.NIVEL_MAXIMO:
-                
-            nivel += 1
-            world_data = resetear_mundo()
+    else:
             
-            #cargar el archivo con nivel
-            with open(f"niveles/nivel_{nivel}.csv", newline="") as csv_file:
-                reader = csv.reader(csv_file, delimiter=',')
-                for x, fila in enumerate(reader):
-                    for y, columna in enumerate(fila):
-                        world_data [x] [y] = int(columna)
-            world = md.Mundo()
-            world.procesar_data(world_data, lista_tile, item_imagenes, animacion_enemigos) 
-            jugador.actualizar_coordenadas(cons.COORDENADAS_ENEMIGO_NIVEL[str(nivel)])
-            #crear una lista de enemigos######################### tratar de hacer una funcion, mejorar##############
-            lista_enemigos = []
-            for ene in world.lista_enemigo:
-                lista_enemigos.append(ene)
-            #añadir items de la data de world ######################### tratar de hacer una funcion, mejorar##############
-            for item in world.lista_item:
-                grupo_items.add(item)
+        #que valla a 60 fps
+        reloj.tick(cons.FPS)
 
-    if not jugador.vivo:
-        ventana.fill(cons.ROJO_OSCURO)
-        text_rect = game_over_text.get_rect(center = (cons.ANCHO_VENTANA/2, cons.ALTO_VENTANA/2))
 
-        ventana.blit(game_over_text, text_rect)
-        # boton de reinicio
-        boton_reinicio = pg.Rect(cons.ANCHO_VENTANA/2 - 100, cons.ALTO_VENTANA/2 + 150, 200, 50)
-        pg.draw.rect(ventana, cons.COLOR_BLANCO, boton_reinicio)
-        ventana.blit(texto_boton_reinicio, (boton_reinicio.x + 50, boton_reinicio.y + 10))
-    
-    for event in pg.event.get():
-        if event.type == pg.QUIT:
-            run = False
+        ventana.fill(cons.COLOR_SUELO)
 
-        if event.type == pg.KEYDOWN:
-            if event.key == pg.K_w:
-                mover_arriba = True
-            elif event.key == pg.K_s:
-                mover_abajo = True
-            elif event.key == pg.K_d:
-                mover_derecha = True
-            elif event.key == pg.K_a:
-                mover_izquierda = True
-            elif event.key == pg.K_e:
-                if world.cambiar_puerta(jugador, lista_tile):
-                    print("puerta cambiada")
+        if jugador.vivo:
 
-        #cuando la tecla se suelta
-        if event.type == pg.KEYUP:
-            if event.key == pg.K_w:
-                mover_arriba = False
-            elif event.key == pg.K_s:
-                mover_abajo = False
-            elif event.key == pg.K_d:
-                mover_derecha = False
-            elif event.key == pg.K_a:
-                mover_izquierda = False
-        if event.type == pg.MOUSEBUTTONDOWN:
-            if boton_reinicio.collidepoint(event.pos) and not jugador.vivo:
-                #################################### optimizar con funcion ####################################
-                jugador.vivo = True
-                jugador.energia = 100
-                jugador.score = 0
-                nivel = 1
+
+
+            #calcular movimiento del jugador
+            delta_x = 0
+            delta_y = 0
+
+            if mover_derecha == True:
+                delta_x = cons.VELOCIDAD_PERSONAJE
+            if mover_izquierda == True:
+                delta_x = -cons.VELOCIDAD_PERSONAJE
+            if mover_abajo == True:
+                delta_y = cons.VELOCIDAD_PERSONAJE
+            if mover_arriba == True:
+                delta_y = -cons.VELOCIDAD_PERSONAJE
+
+                #mover al jugador
+            posicion_pantalla, nivel_completo = jugador.movimiento(delta_x, delta_y, world.obstaculos_tiles, world.exit_tile)
+
+            # actualiza el mapa
+            world.update(posicion_pantalla)
+
+            #actualiza estado de jugador
+            jugador.update()
+
+            #actualiza estado de enemigo
+            for ene in lista_enemigos:
+                ene.update()
+        
+            
+            #actualiza el esatdo del arma
+            bala = arma.update(jugador)
+
+            if bala:
+                grupo_balas.add(bala)
+            for bala in grupo_balas:
+                damage, post_damage = bala.update(lista_enemigos, world.obstaculos_tiles)    
+                if damage:
+                    damage_text = tx.Damage_text(post_damage.centerx, post_damage.centery, "-" + str(damage), font, cons.COLOR_ROJO)
+                    grupo_damage_text.add(damage_text)
+
+
+
+            # actualizar el daño
+            grupo_damage_text.update(posicion_pantalla)
+
+            #actualizar items
+            grupo_items.update(posicion_pantalla, jugador)
+
+        #dibujar mundo
+        world.draw(ventana)
+        
+        #dibujar al jugador
+        jugador.dibujar(ventana)
+        
+        #dibujar al enemigo
+
+        for ene in lista_enemigos:
+            if ene.energia <= 0:
+                lista_enemigos.remove(ene)
+            else:
+                ene.enemigos(jugador, world.obstaculos_tiles, posicion_pantalla, world.exit_tile)
+                ene.dibujar(ventana)
+            
+        #dibujar el arma
+        arma.dibujar(ventana)
+
+        #dibujar balas
+        for bala in grupo_balas:
+            bala.dibujar(ventana)
+
+        #dibujar corazones
+        vida_jugador()
+
+        #dibujar textos
+        grupo_damage_text.draw(ventana)
+        dibujar_texto_pantalla(f"SCORE : {jugador.score}", font_score, cons.COLOR_AMARILLO, cons.POSICION_TEXTO_SCORE_X, cons.POSICION_TEXTO_SCORE_Y)
+
+        # nivel
+        dibujar_texto_pantalla(f"N I V E L: " + str(nivel), font, cons.COLOR_BLANCO, cons.ANCHO_VENTANA / 2, 5)
+
+        #dibujar items
+        grupo_items.draw(ventana)
+
+        # chuequear si el nivel esta completo
+        if nivel_completo:
+            if nivel < cons.NIVEL_MAXIMO:
+                    
+                nivel += 1
                 world_data = resetear_mundo()
-                    #cargar el archivo con nivel
+                
+                #cargar el archivo con nivel
                 with open(f"niveles/nivel_{nivel}.csv", newline="") as csv_file:
                     reader = csv.reader(csv_file, delimiter=',')
                     for x, fila in enumerate(reader):
                         for y, columna in enumerate(fila):
-                                world_data [x] [y] = int(columna)
+                            world_data [x] [y] = int(columna)
                 world = md.Mundo()
                 world.procesar_data(world_data, lista_tile, item_imagenes, animacion_enemigos) 
                 jugador.actualizar_coordenadas(cons.COORDENADAS_ENEMIGO_NIVEL[str(nivel)])
-
-                  #añadir items de la data de world ################# tratar de hacer una funcion, mejorar##############
-                for item in world.lista_item:
-                    grupo_items.add(item)
-                #crear una lista de enemigos################### tratar de hacer una funcion, mejorar##############
+                #crear una lista de enemigos######################### tratar de hacer una funcion, mejorar##############
                 lista_enemigos = []
                 for ene in world.lista_enemigo:
                     lista_enemigos.append(ene)
-                
+                #añadir items de la data de world ######################### tratar de hacer una funcion, mejorar##############
+                for item in world.lista_item:
+                    grupo_items.add(item)
 
+        if not jugador.vivo:
+            ventana.fill(cons.ROJO_OSCURO)
+            text_rect = game_over_text.get_rect(center = (cons.ANCHO_VENTANA/2, cons.ALTO_VENTANA/2))
 
-
+            ventana.blit(game_over_text, text_rect)
+            # boton de reinicio
+            boton_reinicio = pg.Rect(cons.ANCHO_VENTANA/2 - 100, cons.ALTO_VENTANA/2 + 150, 200, 50)
+            pg.draw.rect(ventana, cons.COLOR_BLANCO, boton_reinicio)
+            ventana.blit(texto_boton_reinicio, (boton_reinicio.x + 50, boton_reinicio.y + 10))
         
-        
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                run = False
 
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_w:
+                    mover_arriba = True
+                elif event.key == pg.K_s:
+                    mover_abajo = True
+                elif event.key == pg.K_d:
+                    mover_derecha = True
+                elif event.key == pg.K_a:
+                    mover_izquierda = True
+                elif event.key == pg.K_e:
+                    if world.cambiar_puerta(jugador, lista_tile):
+                        print("puerta cambiada")
 
-    pg.display.update()
+            #cuando la tecla se suelta
+            if event.type == pg.KEYUP:
+                if event.key == pg.K_w:
+                    mover_arriba = False
+                elif event.key == pg.K_s:
+                    mover_abajo = False
+                elif event.key == pg.K_d:
+                    mover_derecha = False
+                elif event.key == pg.K_a:
+                    mover_izquierda = False
+            if event.type == pg.MOUSEBUTTONDOWN:
+                if boton_reinicio.collidepoint(event.pos) and not jugador.vivo:
+                    #################################### optimizar con funcion ######################################################
+                    jugador.vivo = True
+                    jugador.energia = 100
+                    jugador.score = 0
+                    nivel = 1
+                    world_data = resetear_mundo()
+                        #cargar el archivo con nivel
+                    with open(f"niveles/nivel_{nivel}.csv", newline="") as csv_file:
+                        reader = csv.reader(csv_file, delimiter=',')
+                        for x, fila in enumerate(reader):
+                            for y, columna in enumerate(fila):
+                                    world_data [x] [y] = int(columna)
+                    world = md.Mundo()
+                    world.procesar_data(world_data, lista_tile, item_imagenes, animacion_enemigos) 
+                    jugador.actualizar_coordenadas(cons.COORDENADAS_ENEMIGO_NIVEL[str(nivel)])
+
+                    #añadir items de la data de world ################# tratar de hacer una funcion, mejorar########
+                    for item in world.lista_item:
+                        grupo_items.add(item)
+                    #crear una lista de enemigos################### tratar de hacer una funcion, mejorar##############
+                    lista_enemigos = []
+                    for ene in world.lista_enemigo:
+                        lista_enemigos.append(ene)
+                    ################################## hata aca, ver si este bloque se puede optimizar ###############################
+
+        pg.display.update()
 
 pg.quit()
 
