@@ -60,6 +60,11 @@ font_titulo = pg.font.Font("assets/font/Colorfiction - Gothic - Regular.otf", 80
 game_over_text = font_game_over.render("GAME OVER", True, cons.COLOR_BLANCO)
 texto_boton_reinicio = font_reinicio.render("Reiniciar", True, cons.COLOR_NEGRO)
 
+# pantalla de victoria 
+texto_ganaste = font_titulo.render("¡GANASTE!", True, cons.COLOR_BLANCO)
+rect_ganaste = texto_ganaste.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA // 2))
+
+
 # botones de inicio
 boton_jugar = pg.Rect(cons.ANCHO_VENTANA/2 -100, cons.ALTO_VENTANA/2 -50, 200, 50)
 boton_salir = pg.Rect(cons.ANCHO_VENTANA/2 -100, cons.ALTO_VENTANA/2 +50, 200, 50)
@@ -247,7 +252,42 @@ prueba = True
 run = True
 mostrar_inicio = True
 
+# estado de victoria
+mostrar_ganaste = False
+t_inicio_ganaste = 0
+
 while run:
+        # pantalla de victoria (3 segundos y volver al menú) 
+    if mostrar_ganaste:
+        ventana.fill(cons.COLOR_SUELO)
+        ventana.blit(texto_ganaste, rect_ganaste)
+        pg.display.update()
+
+        # tras 3s, reset y volver al inicio
+        if pg.time.get_ticks() - t_inicio_ganaste >= 3000:
+            # resetear estado básico
+            jugador.vivo = True
+            jugador.energia = 100
+            jugador.score = 0
+            nivel = 1
+
+            # limpiar grupos
+            grupo_damage_text.empty()
+            grupo_balas.empty()
+            grupo_items.empty()
+
+            # recargar nivel 1
+            world, lista_enemigos = cargar_world_y_enemigos(nivel, lista_tile, item_imagenes, animacion_enemigos)
+            jugador.actualizar_coordenadas(cons.COORDENADAS_ENEMIGO_NIVEL[str(nivel)])
+            for item in world.lista_item:
+                grupo_items.add(item)
+
+            # volver a pantalla de inicio
+            mostrar_ganaste = False
+            mostrar_inicio = True
+
+        continue  # saltar el resto del frame mientras está la pantalla de victoria
+
     if mostrar_inicio:
         pantalla_inicio()
         for event in pg.event.get():
@@ -367,6 +407,10 @@ while run:
                 # refrescar items del mundo (como ya hacías)
                 for item in world.lista_item:
                     grupo_items.add(item)
+            else:
+                # activar pantalla de victoria (3s)
+                mostrar_ganaste = True
+                t_inicio_ganaste = pg.time.get_ticks()
 
 
         if not jugador.vivo:
