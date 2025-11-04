@@ -8,13 +8,16 @@ import items as ts
 import mundo as md
 import csv
 
+
+
 #######  FUNCIONES  ########
 
 #  escalar imagen
 def escalar_img(image, scale):
     w = image.get_width()
     h = image.get_height()
-    nueva_imagen = pg.transform.scale(image, (w*scale, h*scale))
+    # uso de scale con casteo a int para evitar errores de tipo
+    nueva_imagen = pg.transform.scale(image, (int(w * scale), int(h * scale)))
     return nueva_imagen
 
 # funcion para contar elementos
@@ -25,9 +28,17 @@ def contar_elementos (directorio):
 def nombre_carpetas(directorio):
     return os.listdir(directorio)
 
+# NUEVO: carga con convert_alpha() y escala opcional
+def cargar_imagen(path, escala=None):
+    img = pg.image.load(path).convert_alpha()
+    if escala is not None:
+        img = escalar_img(img, escala)
+    return img
+
 
 
 pg.init()
+pg.mixer.init()
 
 ventana = pg.display.set_mode((cons.ANCHO_VENTANA, cons.ALTO_VENTANA))
 pg. display.set_caption(cons.NOMBRE_JUEGO)
@@ -52,8 +63,8 @@ texto_boton_reinicio = font_reinicio.render("Reiniciar", True, cons.COLOR_NEGRO)
 # botones de inicio
 boton_jugar = pg.Rect(cons.ANCHO_VENTANA/2 -100, cons.ALTO_VENTANA/2 -50, 200, 50)
 boton_salir = pg.Rect(cons.ANCHO_VENTANA/2 -100, cons.ALTO_VENTANA/2 +50, 200, 50)
-texto_boton_jugar = font_inicio.render("JUGAR", True, cons.COLOR_NEGRO)
-texto_boton_salir = font_inicio.render("SALIR", True, cons.COLOR_BLANCO)
+texto_boton_jugar = font_inicio.render("JUGAR", True, cons.COLOR_NEGRO)# cambiar fuente, no se lee bien
+texto_boton_salir = font_inicio.render("SALIR", True, cons.COLOR_BLANCO)# cambiar fuente, no se lee bien
 
 # pantalla de inicio
 def pantalla_inicio():
@@ -68,23 +79,20 @@ def pantalla_inicio():
 ##############importar imagenes#############
 
 # energia
-corazon_vacio = pg.image.load("assets/images/items/corazon_vacio_1.png")
-corazon_vacio = escalar_img(corazon_vacio, cons.ESCALA_CORAZONES)
-corazon_medio = pg.image.load("assets/images/items/corazon_mitad_1.png")
-corazon_medio = escalar_img(corazon_medio, cons.ESCALA_CORAZONES)
-corazon_lleno = pg.image.load("assets/images/items/corazon_lleno_1.png")
-corazon_lleno = escalar_img(corazon_lleno, cons.ESCALA_CORAZONES)
+corazon_vacio = cargar_imagen("assets/images/items/corazon_vacio_1.png", cons.ESCALA_CORAZONES)
+corazon_medio = cargar_imagen("assets/images/items/corazon_mitad_1.png", cons.ESCALA_CORAZONES)
+corazon_lleno = cargar_imagen("assets/images/items/corazon_lleno_1.png", cons.ESCALA_CORAZONES)
 
 #personaje
 animaciones = []
 for i in range(7):
-    img = pg.image.load(f"assets/images/characters/players/necro_mov_{i+1}.png")
-    img = escalar_img(img, cons.ESCALA_PERSONAJE)
+    img = cargar_imagen(f"assets/images/characters/players/necro_mov_{i+1}.png", cons.ESCALA_PERSONAJE)
     animaciones.append(img)
 
 directorio_enemigos = ("assets/images/characters/enemigos") 
 tipo_enemigos = nombre_carpetas(directorio_enemigos)
 
+# realizamos la animacion del enemigo
 animacion_enemigos = []
 for eni in tipo_enemigos:
     lista_temporal = []
@@ -102,37 +110,33 @@ for eni in tipo_enemigos:
         ruta_completa = f"{ruta_temporal}/{nombre_archivo}"
         
         # Cargamos la imagen usando esa ruta
-        imagen_enemigo = pg.image.load(ruta_completa)
-        imagen_enemigo = escalar_img(imagen_enemigo, cons.ESCALA_ENEMIGOS)
+        imagen_enemigo = cargar_imagen(ruta_completa, cons.ESCALA_ENEMIGOS)
         lista_temporal.append(imagen_enemigo)
     
     animacion_enemigos.append(lista_temporal)
 
 #armas
-imagen_arma = pg.image.load(f"assets/images/weapons/vacio.png")
-imagen_arma = escalar_img(imagen_arma, cons.ESCALA_ARMA)
+imagen_arma = cargar_imagen("assets/images/weapons/vacio.png", cons.ESCALA_ARMA)
 
 #balas
-imagen_bala = pg.image.load(f"assets/images/weapons/bullets/fuego_1.png")
-imagen_bala = escalar_img(imagen_bala, cons.ESCALA_BALA)
+imagen_bala = cargar_imagen("assets/images/weapons/bullets/fuego_1.png", cons.ESCALA_BALA)
 
 #cargar imagenes del mundo
 lista_tile = []
 for x in range(cons.TIPOS_TILES):
-    tile_image = pg.image.load(f"assets/images/tiles/tile_{x+1}.png")
-    tile_image = pg.transform.scale(tile_image, (cons.TAMANIO_TILES, cons.TAMANIO_TILES))
+    tile_image = pg.image.load(f"assets/images/tiles/tile_{x+1}.png").convert_alpha()
+    tile_image = pg.transform.scale(tile_image, (int(cons.TAMANIO_TILES), int(cons.TAMANIO_TILES)))
     lista_tile.append(tile_image)
 
 #cargar imagen de los items
-posion_roja = pg.image.load("assets/images/items/posion/posion.png")
-posion_roja = escalar_img(posion_roja, cons.ESCALA_POSION_ROJA)
+posion_roja = cargar_imagen("assets/images/items/posion/posion.png", cons.ESCALA_POSION_ROJA)
+
 
 monedas_imagen = []
 ruta_imagen = "assets/images/items/moneda"
 numero_monedas_imagen = contar_elementos(ruta_imagen)
-for i in range (numero_monedas_imagen):
-    img = pg.image.load(f"assets/images/items/moneda/moneda_frame_{i+1}.png")
-    img = escalar_img(img, cons.ESCALA_MONEDA)
+for i in range(numero_monedas_imagen):
+    img = cargar_imagen(f"assets/images/items/moneda/moneda_frame_{i+1}.png", cons.ESCALA_MONEDA)
     monedas_imagen.append(img)
 
 item_imagenes = [monedas_imagen, [posion_roja]]
@@ -158,10 +162,34 @@ def resetear_mundo():
     grupo_items.empty()
     # crear una lista de tile vacias
     data = []
-    for fila in range (cons.FILAS):
+    for filas in range (cons.FILAS):
         filas = [2] * cons.COLUMNAS
         data.append(filas)
     return data
+
+# funciones de nivel / mundo  
+def leer_csv_nivel(nivel):
+    # lee el CSV del nivel y devuelve la matriz world_data
+    data = [[7] * cons.COLUMNAS for _ in range(cons.FILAS)]
+    with open(f"niveles/nivel_{nivel}.csv", newline="") as csv_file:
+        reader = csv.reader(csv_file, delimiter=',')
+        for x, fila in enumerate(reader):
+            for y, columna in enumerate(fila):
+                data[x][y] = int(columna)
+    return data
+
+def cargar_world_y_enemigos(nivel, lista_tile, item_imagenes, animacion_enemigos):
+    # crea world + lista_enemigos sin tocar grupos (grupo_items se maneja afuera)
+    world_data_local = leer_csv_nivel(nivel)
+    world_local = md.Mundo()
+    world_local.procesar_data(world_data_local, lista_tile, item_imagenes, animacion_enemigos)
+
+    lista_enemigos_local = []
+    for ene in world_local.lista_enemigo:
+        lista_enemigos_local.append(ene)
+
+    return world_local, lista_enemigos_local
+
 
 world_data = []
 
@@ -228,6 +256,7 @@ while run:
             if event.type == pg.MOUSEBUTTONDOWN:
                 if boton_jugar.collidepoint(event.pos):
                     mostrar_inicio = False
+                    ############################# arreglar que el clicks se borre y no dispare al iniciar el juego#######
                 if boton_salir.collidepoint(event.pos):
                     run = False
 
@@ -297,13 +326,16 @@ while run:
         
         #dibujar al enemigo
 
-        for ene in lista_enemigos:
+        for ene in lista_enemigos.copy():  # iterar sobre copia para poder eliminar
             if ene.energia <= 0:
                 lista_enemigos.remove(ene)
-            else:
-                ene.enemigos(jugador, world.obstaculos_tiles, posicion_pantalla, world.exit_tile)
-                ene.dibujar(ventana)
-            
+                continue  #  no seguir procesando/dibujando este enemigo eliminado
+
+            # update IA / colisiones / etc
+            ene.enemigos(jugador, world.obstaculos_tiles, posicion_pantalla, world.exit_tile)
+            # dibujar sprite
+            ene.dibujar(ventana)
+
         #dibujar el arma
         arma.dibujar(ventana)
 
@@ -327,26 +359,15 @@ while run:
         # chuequear si el nivel esta completo
         if nivel_completo:
             if nivel < cons.NIVEL_MAXIMO:
-                    
                 nivel += 1
-                world_data = resetear_mundo()
-                
-                #cargar el archivo con nivel
-                with open(f"niveles/nivel_{nivel}.csv", newline="") as csv_file:
-                    reader = csv.reader(csv_file, delimiter=',')
-                    for x, fila in enumerate(reader):
-                        for y, columna in enumerate(fila):
-                            world_data [x] [y] = int(columna)
-                world = md.Mundo()
-                world.procesar_data(world_data, lista_tile, item_imagenes, animacion_enemigos) 
+                # cargar mundo y enemigos con función
+                world, lista_enemigos = cargar_world_y_enemigos(nivel, lista_tile, item_imagenes, animacion_enemigos)
+                # reposicionar jugador según config
                 jugador.actualizar_coordenadas(cons.COORDENADAS_ENEMIGO_NIVEL[str(nivel)])
-                #crear una lista de enemigos######################### tratar de hacer una funcion, mejorar##############
-                lista_enemigos = []
-                for ene in world.lista_enemigo:
-                    lista_enemigos.append(ene)
-                #añadir items de la data de world ######################### tratar de hacer una funcion, mejorar##############
+                # refrescar items del mundo (como ya hacías)
                 for item in world.lista_item:
                     grupo_items.add(item)
+
 
         if not jugador.vivo:
             ventana.fill(cons.ROJO_OSCURO)
@@ -386,31 +407,20 @@ while run:
                 elif event.key == pg.K_a:
                     mover_izquierda = False
             if event.type == pg.MOUSEBUTTONDOWN:
-                if boton_reinicio.collidepoint(event.pos) and not jugador.vivo:
-                    #################################### optimizar con funcion ######################################################
+                if not jugador.vivo and boton_reinicio.collidepoint(event.pos):
+                    # resetear estado del jugador
                     jugador.vivo = True
                     jugador.energia = 100
                     jugador.score = 0
                     nivel = 1
-                    world_data = resetear_mundo()
-                        #cargar el archivo con nivel
-                    with open(f"niveles/nivel_{nivel}.csv", newline="") as csv_file:
-                        reader = csv.reader(csv_file, delimiter=',')
-                        for x, fila in enumerate(reader):
-                            for y, columna in enumerate(fila):
-                                    world_data [x] [y] = int(columna)
-                    world = md.Mundo()
-                    world.procesar_data(world_data, lista_tile, item_imagenes, animacion_enemigos) 
+                    # cargar mundo y enemigos con función
+                    world, lista_enemigos = cargar_world_y_enemigos(nivel, lista_tile, item_imagenes, animacion_enemigos)
+                    # reposicionar jugador
                     jugador.actualizar_coordenadas(cons.COORDENADAS_ENEMIGO_NIVEL[str(nivel)])
-
-                    #añadir items de la data de world ################# tratar de hacer una funcion, mejorar########
+                    # refrescar items del mundo (como ya hacías)
                     for item in world.lista_item:
                         grupo_items.add(item)
-                    #crear una lista de enemigos################### tratar de hacer una funcion, mejorar##############
-                    lista_enemigos = []
-                    for ene in world.lista_enemigo:
-                        lista_enemigos.append(ene)
-                    ################################## hata aca, ver si este bloque se puede optimizar ###############################
+
 
         pg.display.update()
 
