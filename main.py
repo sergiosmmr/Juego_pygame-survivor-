@@ -47,6 +47,11 @@ pg. display.set_caption(cons.NOMBRE_JUEGO)
 posicion_pantalla = [0, 0]
 nivel = 1
 
+# === MÚSICA ===
+MUSICA_MENU = "assets/sonidos/menu2.mp3"
+MUSICA_JUEGO = "assets/sonidos/juego.mp3"
+pg.mixer.music.set_volume(0.5)  # volumen medio
+
 ##### FUENTES ######
 font = pg.font.Font("assets/font/Ryga.ttf", cons.TAMANIO_FUENTE_ENEMIGOS)
 font_score = pg.font.Font("assets/font/Ryga.ttf", cons.TAMANIO_FUENTE_SCORE)
@@ -290,11 +295,18 @@ while run:
 
     if mostrar_inicio:
         pantalla_inicio()
+        if not pg.mixer.music.get_busy():
+            pg.mixer.music.load(MUSICA_MENU)
+            pg.mixer.music.play(-1)  # -1 = loop infinito
+
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 run = False
             if event.type == pg.MOUSEBUTTONDOWN:
                 if boton_jugar.collidepoint(event.pos):
+                    pg.mixer.music.load(MUSICA_JUEGO)
+                    pg.mixer.music.play(-1)
+
                     mostrar_inicio = False
                     ############################# arreglar que el clicks se borre y no dispare al iniciar el juego#######
                 if boton_salir.collidepoint(event.pos):
@@ -408,6 +420,10 @@ while run:
                 for item in world.lista_item:
                     grupo_items.add(item)
             else:
+                # detener música del juego al ganar
+                if pg.mixer.music.get_busy():
+                    pg.mixer.music.stop()
+
                 # activar pantalla de victoria (3s)
                 mostrar_ganaste = True
                 t_inicio_ganaste = pg.time.get_ticks()
