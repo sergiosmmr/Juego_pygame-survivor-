@@ -69,6 +69,24 @@ font_titulo = pg.font.Font("assets/font/Colorfiction - Gothic - Regular.otf", 80
 game_over_text = font_game_over.render("GAME OVER", True, cons.COLOR_BLANCO)
 texto_boton_reinicio = font_reinicio.render("Reiniciar", True, cons.COLOR_NEGRO)
 
+#  Variables para ingreso de nombre 
+font_input = pg.font.Font("assets/font/Colorfiction - Gothic - Regular.otf", 28)
+label_nombre = font_input.render("Ingresá tus iniciales (3):", True, cons.COLOR_BLANCO)
+
+input_rect = pg.Rect(cons.ANCHO_VENTANA//2 - 80, cons.ALTO_VENTANA//2 + 100, 160, 40)
+color_inactivo = (cons.COLOR_NEGRO)
+color_activo = (cons.COLOR_BLANCO)
+
+SCORES_FILE = "scores.csv"   # Archivo donde se guardará
+
+# AÑADIDO: Variables de estado para el input 
+mensaje_fin_juego = "GAME OVER" # Cambiará a "¡GANASTE!" si ganas
+font_fin_juego = font_game_over # Para usar la fuente grande o la de título
+input_activo = False
+nombre_jugador = ""
+puntaje_guardado = False
+t_fin_juego = 0 # Temporizador para el delay
+
 # pantalla de victoria 
 texto_ganaste = font_titulo.render("¡GANASTE!", True, cons.COLOR_BLANCO)
 rect_ganaste = texto_ganaste.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA // 2))
@@ -374,93 +392,163 @@ while run:
             #actualizar items
             grupo_items.update(posicion_pantalla, jugador)
 
-        #dibujar mundo
-        world.draw(ventana)
+            #dibujar mundo
+            world.draw(ventana)
         
-        #dibujar al jugador
-        jugador.dibujar(ventana)
+            #dibujar al jugador
+            jugador.dibujar(ventana)
         
-        #dibujar al enemigo
+            #dibujar al enemigo
 
-        for ene in lista_enemigos.copy():  # iterar sobre copia para poder eliminar
-            if ene.energia <= 0:
-                lista_enemigos.remove(ene)
-                continue  #  no seguir procesando/dibujando este enemigo eliminado
+            for ene in lista_enemigos.copy():  # iterar sobre copia para poder eliminar
+                if ene.energia <= 0:
+                    lista_enemigos.remove(ene)
+                    continue  #  no seguir procesando/dibujando este enemigo eliminado
 
-            # update IA / colisiones / etc
-            ene.enemigos(jugador, world.obstaculos_tiles, posicion_pantalla, world.exit_tile)
-            # dibujar sprite
-            ene.dibujar(ventana)
+                # update IA / colisiones / etc
+                ene.enemigos(jugador, world.obstaculos_tiles, posicion_pantalla, world.exit_tile)
+                # dibujar sprite
+                ene.dibujar(ventana)
 
-        #dibujar el arma
-        arma.dibujar(ventana)
+            #dibujar el arma
+            arma.dibujar(ventana)
 
-        #dibujar balas
-        for bala in grupo_balas:
-            bala.dibujar(ventana)
+            #dibujar balas
+            for bala in grupo_balas:
+                bala.dibujar(ventana)
 
-        #dibujar corazones
-        vida_jugador()
+            #dibujar corazones
+            vida_jugador()
 
-        #dibujar textos
-        grupo_damage_text.draw(ventana)
-        dibujar_texto_pantalla(f"SCORE : {jugador.score}", font_score, cons.COLOR_AMARILLO, cons.POSICION_TEXTO_SCORE_X, cons.POSICION_TEXTO_SCORE_Y)
+            #dibujar textos
+            grupo_damage_text.draw(ventana)
+            dibujar_texto_pantalla(f"SCORE : {jugador.score}", font_score, cons.COLOR_AMARILLO, cons.POSICION_TEXTO_SCORE_X, cons.POSICION_TEXTO_SCORE_Y)
 
-        # nivel
-        dibujar_texto_pantalla(f"N I V E L: " + str(nivel), font, cons.COLOR_BLANCO, cons.ANCHO_VENTANA / 2, 5)
+            # nivel
+            dibujar_texto_pantalla(f"N I V E L: " + str(nivel), font, cons.COLOR_BLANCO, cons.ANCHO_VENTANA / 2, 5)
 
-        #dibujar items
-        grupo_items.draw(ventana)
+            #dibujar items
+            grupo_items.draw(ventana)
 
-        # chuequear si el nivel esta completo
-        if nivel_completo:
-            if nivel < cons.NIVEL_MAXIMO:
-                nivel += 1
-                # cargar mundo y enemigos con función
-                world, lista_enemigos = cargar_world_y_enemigos(nivel, lista_tile, item_imagenes, animacion_enemigos)
-                # reposicionar jugador según config
-                jugador.actualizar_coordenadas(cons.COORDENADAS_ENEMIGO_NIVEL[str(nivel)])
-                # refrescar items del mundo (como ya hacías)
-                for item in world.lista_item:
-                    grupo_items.add(item)
-            else:
-                # detener música del juego al ganar
-                if pg.mixer.music.get_busy():
+            # chuequear si el nivel esta completo
+            if nivel_completo:
+                if nivel < cons.NIVEL_MAXIMO:
+                    nivel += 1
+                    # cargar mundo y enemigos con función
+                    world, lista_enemigos = cargar_world_y_enemigos(nivel, lista_tile, item_imagenes, animacion_enemigos)
+                    # reposicionar jugador según config
+                    jugador.actualizar_coordenadas(cons.COORDENADAS_ENEMIGO_NIVEL[str(nivel)])
+                    # refrescar items del mundo (como ya hacías)
+                    for item in world.lista_item:
+                        grupo_items.add(item)
+                else:
+                    # detener música del juego al ganar
+                    if pg.mixer.music.get_busy():
+                        pg.mixer.music.stop()
+
+                    # --- MODIFICADO: Preparamos la pantalla de ingreso ---
+                    mensaje_fin_juego = "¡GANASTE!"
+                    font_fin_juego = font_titulo # Usamos la fuente de título
+                    
+                    jugador.vivo = False # ¡El truco! Usamos la misma pantalla de "muerto"
+                    t_fin_juego = pg.time.get_ticks() # Inicia el timer
+                    pg.event.clear() # Limpia teclas (W,A,S,D)
+
+                    # activar pantalla de victoria (3s)
+                    ############################################ comentado, borrar despues de debugs #################
+                    #mostrar_ganaste = True
+                    #t_inicio_ganaste = pg.time.get_ticks()
+                    ##################################################################################################
+
+        # LÓGICA DE FIN DE JUEGO (SI NO ESTÁ VIVO)
+        else:
+            # --- LÓGICA DE FIN DE JUEGO (GAME OVER O VICTORIA) ---
+            
+            # 1. Iniciar temporizador 
+            if t_fin_juego == 0:
+                t_fin_juego = pg.time.get_ticks()
+                pg.event.clear() # Limpia teclas 
+                if pg.mixer.music.get_busy(): # Parar música
                     pg.mixer.music.stop()
 
-                # activar pantalla de victoria (3s)
-                mostrar_ganaste = True
-                t_inicio_ganaste = pg.time.get_ticks()
-
-
-        if not jugador.vivo:
+            # 2. Dibujar fondo y título (GAME OVER o ¡GANASTE!)
             ventana.fill(cons.ROJO_OSCURO)
-            text_rect = game_over_text.get_rect(center = (cons.ANCHO_VENTANA/2, cons.ALTO_VENTANA/2))
+            texto_renderizado = font_fin_juego.render(mensaje_fin_juego, True, cons.COLOR_BLANCO)
+            text_rect = texto_renderizado.get_rect(center = (cons.ANCHO_VENTANA/2, cons.ALTO_VENTANA/2))
+            ventana.blit(texto_renderizado, text_rect)
 
-            ventana.blit(game_over_text, text_rect)
-            # boton de reinicio
-            boton_reinicio = pg.Rect(cons.ANCHO_VENTANA/2 - 100, cons.ALTO_VENTANA/2 + 150, 200, 50)
+            # 3. Activar el input SÓLO después de 1 segundo de delay
+            if not input_activo and (pg.time.get_ticks() - t_fin_juego > 1000): # 1000ms = 1 seg
+                input_activo = True
+
+            # 4. Dibujar el input de nombre
+            # Label
+            x_label = input_rect.centerx - (label_nombre.get_width() // 2)
+            ventana.blit(label_nombre, (x_label, input_rect.y - 30))
+            
+            # Campo de texto (color cambia si está activo o no)
+            color_caja = color_activo if input_activo else color_inactivo
+            pg.draw.rect(ventana, color_caja, input_rect, width=2)
+            texto_input = font_input.render(nombre_jugador, True, cons.COLOR_BLANCO)
+            ventana.blit(texto_input, (input_rect.x + 10, input_rect.y + 7))
+
+            # 5. Feedback de guardado
+            if puntaje_guardado:
+                msg_ok = font_input.render("¡Puntaje guardado!", True, cons.COLOR_BLANCO)
+                x_texto_guardado = input_rect.centerx - (msg_ok.get_width() // 2)
+                ventana.blit(msg_ok, (x_texto_guardado, input_rect.y + 45))
+
+            # 6. Botón de reinicio 
+            boton_reinicio = pg.Rect(cons.ANCHO_VENTANA/2 - 100, cons.ALTO_VENTANA/2 + 200, 200, 50)
             pg.draw.rect(ventana, cons.COLOR_BLANCO, boton_reinicio)
             ventana.blit(texto_boton_reinicio, (boton_reinicio.x + 50, boton_reinicio.y + 10))
         
+        #  BUCLE DE EVENTOS  ---
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 run = False
 
+            # --- LÓGICA DE TECLADO (KEYDOWN) ---
             if event.type == pg.KEYDOWN:
-                if event.key == pg.K_w:
-                    mover_arriba = True
-                elif event.key == pg.K_s:
-                    mover_abajo = True
-                elif event.key == pg.K_d:
-                    mover_derecha = True
-                elif event.key == pg.K_a:
-                    mover_izquierda = True
-                elif event.key == pg.K_e:
-                    if world.cambiar_puerta(jugador, lista_tile):
-                        print("puerta cambiada")
 
-            #cuando la tecla se suelta
+                if jugador.vivo:
+                    if event.key == pg.K_w:
+                        mover_arriba = True
+                    elif event.key == pg.K_s:
+                        mover_abajo = True
+                    elif event.key == pg.K_d:
+                        mover_derecha = True
+                    elif event.key == pg.K_a:
+                        mover_izquierda = True
+                    elif event.key == pg.K_e:
+                        if world.cambiar_puerta(jugador, lista_tile):
+                            print("puerta cambiada")
+                else:
+                # --- Eventos de INPUT (solo si está muerto/ganó y el input está activo) ---
+                    if input_activo:
+                        if event.key == pg.K_BACKSPACE:
+                            nombre_jugador = nombre_jugador[:-1]
+                    
+                        elif event.key == pg.K_RETURN:
+                            # Guardar puntaje si tiene 3 letras y no se guardó
+                            if len(nombre_jugador.strip()) == 3 and not puntaje_guardado:
+                                try:
+                                    # 'os' y 'csv' ya están importados al inicio
+                                    file_existe = os.path.isfile(SCORES_FILE)
+                                    with open(SCORES_FILE, "a", newline="", encoding="utf-8") as f:
+                                        writer = csv.writer(f)
+                                        if not file_existe:
+                                            writer.writerow(["nombre", "score"]) # Encabezado
+                                        writer.writerow([nombre_jugador.strip().upper(), jugador.score])
+                                    puntaje_guardado = True
+                                except Exception as e:
+                                    print("[ERROR guardando score]", e)
+
+                        # Añadir letra (solo si es alfa, < 3 letras y no guardó)
+                        elif event.unicode.isalpha() and len(nombre_jugador) < 3 and not puntaje_guardado:
+                            nombre_jugador += event.unicode.upper()
+
+            # LÓGICA DE TECLA LEVANTADA (KEYUP) 
             if event.type == pg.KEYUP:
                 if event.key == pg.K_w:
                     mover_arriba = False
@@ -470,20 +558,51 @@ while run:
                     mover_derecha = False
                 elif event.key == pg.K_a:
                     mover_izquierda = False
+
+            # LÓGICA DE CLICKS (MOUSEBUTTONDOWN) 
             if event.type == pg.MOUSEBUTTONDOWN:
-                if not jugador.vivo and boton_reinicio.collidepoint(event.pos):
-                    # resetear estado del jugador
-                    jugador.vivo = True
-                    jugador.energia = 100
-                    jugador.score = 0
-                    nivel = 1
-                    # cargar mundo y enemigos con función
-                    world, lista_enemigos = cargar_world_y_enemigos(nivel, lista_tile, item_imagenes, animacion_enemigos)
-                    # reposicionar jugador
-                    jugador.actualizar_coordenadas(cons.COORDENADAS_ENEMIGO_NIVEL[str(nivel)])
-                    # refrescar items del mundo (como ya hacías)
-                    for item in world.lista_item:
-                        grupo_items.add(item)
+                if not jugador.vivo:
+                    # 1. Click en el botón REINICIAR
+                    if boton_reinicio.collidepoint(event.pos):
+                        # resetear estado del jugador
+                        jugador.vivo = True
+                        jugador.energia = 100
+                        jugador.score = 0
+                        nivel = 1
+
+                        # --- AÑADIDO: Resetear variables de input ---
+                        input_activo = False
+                        nombre_jugador = ""
+                        puntaje_guardado = False
+                        t_fin_juego = 0
+                        mensaje_fin_juego = "GAME OVER" # Resetea el título
+                        font_fin_juego = font_game_over # Resetea la fuente
+                        
+                        # Limpiar grupos
+                        grupo_damage_text.empty()
+                        grupo_balas.empty()
+                        grupo_items.empty()
+
+                        # recargar mundo y enemigos
+                        world, lista_enemigos = cargar_world_y_enemigos(nivel, lista_tile, item_imagenes, animacion_enemigos)
+                        # reposicionar jugador
+                        jugador.actualizar_coordenadas(cons.COORDENADAS_ENEMIGO_NIVEL[str(nivel)])
+                        # agregar items
+                        for item in world.lista_item:
+                            grupo_items.add(item)
+                        
+                        # Reiniciar música
+                        pg.mixer.music.load(MUSICA_JUEGO)
+                        pg.mixer.music.play(-1)
+
+                    # 2. Click en la CAJA de input
+                    elif input_rect.collidepoint(event.pos):
+                        if pg.time.get_ticks() - t_fin_juego > 1000: # Solo activa si pasó el delay
+                            input_activo = True
+                    
+                    # 3. Click FUERA de la caja
+                    else:
+                        input_activo = False
 
 
         pg.display.update()
