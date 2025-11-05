@@ -260,10 +260,10 @@ with open("niveles/nivel_1.csv", newline="") as csv_file:
 world = md.Mundo()
 world.procesar_data(world_data, lista_tile, item_imagenes, animacion_enemigos) 
 
-def dibujar_grid():
-    for x in range(50):
-        pg.draw.line(ventana, cons.COLOR_BLANCO, (x*cons.TAMANIO_TILES, 0), (x*cons.TAMANIO_TILES, cons.ALTO_VENTANA))
-        pg.draw.line(ventana, cons.COLOR_BLANCO, (0, x*cons.TAMANIO_TILES), (cons.ANCHO_VENTANA, x*cons.TAMANIO_TILES))
+# def dibujar_grid():
+#     for x in range(50):
+#         pg.draw.line(ventana, cons.COLOR_BLANCO, (x*cons.TAMANIO_TILES, 0), (x*cons.TAMANIO_TILES, cons.ALTO_VENTANA))
+#         pg.draw.line(ventana, cons.COLOR_BLANCO, (0, x*cons.TAMANIO_TILES), (cons.ANCHO_VENTANA, x*cons.TAMANIO_TILES))
 
 
 #crear un jugador de la clase personaje en posicion x , y
@@ -300,6 +300,7 @@ reloj = pg.time.Clock()
 prueba = True
 run = True
 mostrar_inicio = True
+evitar_click_fantasma = False
 
 # estado de victoria
 mostrar_ganaste = False
@@ -352,6 +353,7 @@ while run:
                     pg.mixer.music.play(-1)
 
                     mostrar_inicio = False
+                    evitar_click_fantasma = True
                     ############################# arreglar que el clicks se borre y no dispare al iniciar el juego#######
                 if boton_salir.collidepoint(event.pos):
                     run = False
@@ -396,7 +398,17 @@ while run:
         
             
             #actualiza el esatdo del arma
-            bala = arma.update(jugador)
+            bala = None
+            
+            # Revisamos la bandera (tu "retardo")
+            if evitar_click_fantasma:
+                # Si está activa, la consumimos y no hacemos nada.
+                # El click se ignora este frame.
+                if not pg.mouse.get_pressed()[0]:
+                    evitar_click_fantasma = False
+            else:
+                # Si la bandera está inactiva, actualizamos el arma normalmente.
+                bala = arma.update(jugador)
 
             if bala:
                 grupo_balas.add(bala)
