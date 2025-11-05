@@ -52,6 +52,10 @@ MUSICA_MENU = "assets/sonidos/menu2.mp3"
 MUSICA_JUEGO = "assets/sonidos/juego.mp3"
 pg.mixer.music.set_volume(0.5)  # volumen medio
 
+# <--- 1. AÑADIDO: Cargar el sonido del disparo ---
+sonido_disparo = pg.mixer.Sound("assets/sonidos/disparo.wav")  
+sonido_disparo.set_volume(0.35)  # Ajusto el volumen 
+
 ##### FUENTES ######
 font = pg.font.Font("assets/font/Ryga.ttf", cons.TAMANIO_FUENTE_ENEMIGOS)
 font_score = pg.font.Font("assets/font/Ryga.ttf", cons.TAMANIO_FUENTE_SCORE)
@@ -231,7 +235,7 @@ for ene in world.lista_enemigo:
     lista_enemigos.append(ene)
 
 #crear un arma de la clase weapon centrada en jugador
-arma = wp.weapon(imagen_arma, imagen_bala)
+arma = wp.weapon(imagen_arma, imagen_bala, sonido_disparo)
 
 #crear un grupo de sprites
 grupo_damage_text = pg.sprite.Group()

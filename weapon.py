@@ -6,13 +6,14 @@ import random
 
 
 class weapon():
-    def __init__(self, image, imagen_bala):
+    def __init__(self, image, imagen_bala,sonido_disparo):
         self.imagen_bala = imagen_bala
         self.imagen_original = image
         self.angulo = 0
         self.imagen = pg.transform.rotate(self.imagen_original, self.angulo)
         self.forma = self.imagen.get_rect()
         self.disparada = False
+        self.sonido_disparo = sonido_disparo
         self.ultimo_disparo = pg.time.get_ticks()
 
     def update(self, personaje):
@@ -37,6 +38,7 @@ class weapon():
         #detectar los clicks del mouse
         if pg.mouse.get_pressed()[0] and not self.disparada and (pg.time.get_ticks() - self.ultimo_disparo >= disparo_cooldown):
             bala = Bullets(self.imagen_bala,self.forma.centerx, self.forma.centery, self.angulo)
+            self.sonido_disparo.play()
             self.disparada = True
             self.ultimo_disparo = pg.time.get_ticks()
         #resetear los clicks del mouse
