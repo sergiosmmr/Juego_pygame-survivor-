@@ -48,13 +48,11 @@ posicion_pantalla = [0, 0]
 nivel = 1
 
 # === MÚSICA ===
-MUSICA_MENU = "assets/sonidos/menu2.mp3"
-MUSICA_JUEGO = "assets/sonidos/juego.mp3"
-pg.mixer.music.set_volume(0.5)  # volumen medio
+pg.mixer.music.set_volume(cons.MUSICA_VOLUMEN_NORMAL)  # volumen medio
 
 # Cargar el sonido del disparo ---
-sonido_disparo = pg.mixer.Sound("assets/sonidos/disparo.wav")  
-sonido_disparo.set_volume(0.35)  # Ajusto el volumen 
+sonido_disparo = pg.mixer.Sound(cons.SONIDO_DISPARO)  
+sonido_disparo.set_volume(cons.SONIDO_DISPARO_NORMAL)  # Ajusto el volumen 
 
 ##### FUENTES ######
 font = pg.font.Font("assets/font/Ryga.ttf", cons.TAMANIO_FUENTE_ENEMIGOS)
@@ -101,7 +99,17 @@ texto_boton_salir = font_inicio.render("SALIR", True, cons.COLOR_BLANCO)# cambia
 # pantalla de inicio
 def pantalla_inicio():
     ventana.fill(cons.COLOR_SUELO)
-    dibujar_texto_pantalla ("Mi primer juego SURVIVOR", font_titulo, cons.COLOR_BLANCO, cons.ANCHO_VENTANA/2 -200, cons.ALTO_VENTANA/2 -200)
+
+    # Creo el texto y obtengo su ancho
+    texto_titulo_str = "S U R V I V O R"
+    texto_surface = font_titulo.render(texto_titulo_str, True, cons.COLOR_BLANCO)
+    ancho_texto = texto_surface.get_width()
+
+    #  centrada
+    x_centrada = (cons.ANCHO_VENTANA // 2) - (ancho_texto // 2)
+    
+    # Dibujamos el texto en la x centrada
+    ventana.blit(texto_surface, (x_centrada, cons.ALTO_VENTANA/2 - 200))
     pg.draw.rect(ventana, cons.COLOR_AMARILLO, boton_jugar)
     pg.draw.rect(ventana, cons.COLOR_ROJO, boton_salir)
     ventana.blit(texto_boton_jugar, (boton_jugar.x + 50, boton_jugar.y + 10))
@@ -318,7 +326,7 @@ while run:
     if mostrar_inicio:
         pantalla_inicio()
         if not pg.mixer.music.get_busy():
-            pg.mixer.music.load(MUSICA_MENU)
+            pg.mixer.music.load(cons.MUSICA_MENU)
             pg.mixer.music.play(-1)  # -1 = loop infinito
 
         for event in pg.event.get():
@@ -326,7 +334,7 @@ while run:
                 run = False
             if event.type == pg.MOUSEBUTTONDOWN:
                 if boton_jugar.collidepoint(event.pos):
-                    pg.mixer.music.load(MUSICA_JUEGO)
+                    pg.mixer.music.load(cons.MUSICA_JUEGO)
                     pg.mixer.music.play(-1)
 
                     mostrar_inicio = False
@@ -588,7 +596,7 @@ while run:
                             grupo_items.add(item)
                         
                         # Reiniciar música
-                        pg.mixer.music.load(MUSICA_JUEGO)
+                        pg.mixer.music.load(cons.MUSICA_JUEGO)
                         pg.mixer.music.play(-1)
 
                     # 2. Click en la CAJA de input
