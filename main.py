@@ -52,7 +52,7 @@ MUSICA_MENU = "assets/sonidos/menu2.mp3"
 MUSICA_JUEGO = "assets/sonidos/juego.mp3"
 pg.mixer.music.set_volume(0.5)  # volumen medio
 
-# <--- 1. AÑADIDO: Cargar el sonido del disparo ---
+# Cargar el sonido del disparo ---
 sonido_disparo = pg.mixer.Sound("assets/sonidos/disparo.wav")  
 sonido_disparo.set_volume(0.35)  # Ajusto el volumen 
 
@@ -71,7 +71,7 @@ texto_boton_reinicio = font_reinicio.render("Reiniciar", True, cons.COLOR_NEGRO)
 
 #  Variables para ingreso de nombre 
 font_input = pg.font.Font("assets/font/Colorfiction - Gothic - Regular.otf", 28)
-label_nombre = font_input.render("Ingresá tus iniciales (3):", True, cons.COLOR_BLANCO)
+label_nombre = font_input.render("Ingresá tus iniciales (3) y presiona ENTER:", True, cons.COLOR_BLANCO)
 
 input_rect = pg.Rect(cons.ANCHO_VENTANA//2 - 80, cons.ALTO_VENTANA//2 + 100, 160, 40)
 color_inactivo = (cons.COLOR_NEGRO)
@@ -446,19 +446,13 @@ while run:
                     if pg.mixer.music.get_busy():
                         pg.mixer.music.stop()
 
-                    # --- MODIFICADO: Preparamos la pantalla de ingreso ---
+                    # Preparamos la pantalla de ingreso ---
                     mensaje_fin_juego = "¡GANASTE!"
                     font_fin_juego = font_titulo # Usamos la fuente de título
                     
-                    jugador.vivo = False # ¡El truco! Usamos la misma pantalla de "muerto"
+                    jugador.vivo = False # Usamos la misma pantalla de "muerto"
                     t_fin_juego = pg.time.get_ticks() # Inicia el timer
-                    pg.event.clear() # Limpia teclas (W,A,S,D)
-
-                    # activar pantalla de victoria (3s)
-                    ############################################ comentado, borrar despues de debugs #################
-                    #mostrar_ganaste = True
-                    #t_inicio_ganaste = pg.time.get_ticks()
-                    ##################################################################################################
+                    pg.event.clear() # Limpia teclas 
 
         # LÓGICA DE FIN DE JUEGO (SI NO ESTÁ VIVO)
         else:
@@ -487,7 +481,10 @@ while run:
             ventana.blit(label_nombre, (x_label, input_rect.y - 30))
             
             # Campo de texto (color cambia si está activo o no)
-            color_caja = color_activo if input_activo else color_inactivo
+            if input_activo:
+                color_caja = color_activo
+            else:
+                color_caja = color_inactivo
             pg.draw.rect(ventana, color_caja, input_rect, width=2)
             texto_input = font_input.render(nombre_jugador, True, cons.COLOR_BLANCO)
             ventana.blit(texto_input, (input_rect.x + 10, input_rect.y + 7))
@@ -533,7 +530,6 @@ while run:
                             # Guardar puntaje si tiene 3 letras y no se guardó
                             if len(nombre_jugador.strip()) == 3 and not puntaje_guardado:
                                 try:
-                                    # 'os' y 'csv' ya están importados al inicio
                                     file_existe = os.path.isfile(SCORES_FILE)
                                     with open(SCORES_FILE, "a", newline="", encoding="utf-8") as f:
                                         writer = csv.writer(f)
