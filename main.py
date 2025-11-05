@@ -99,17 +99,36 @@ boton_salir = pg.Rect(cons.ANCHO_VENTANA/2 -100, cons.ALTO_VENTANA/2 +135, 200, 
 texto_boton_jugar = font_inicio.render("JUGAR", True, cons.COLOR_NEGRO)# cambiar fuente, no se lee bien
 texto_boton_menu = font_inicio.render("MENU", True, cons.COLOR_NEGRO)# cambiar fuente, no se lee bien
 texto_boton_salir = font_inicio.render("SALIR", True, cons.COLOR_BLANCO)# cambiar fuente, no se lee bien
-# Botones para la pantalla de MENÚ (usaremos la misma fuente)
 
-# --- ESTE BLOQUE PARA EL TÍTULO "MENU" ---
-# Título "MENU" 
+# --- Variables de la Pantalla de MENÚ ---
+
+# 1. Título "MENU" 
 texto_titulo_menu = font_titulo.render("MENU", True, cons.COLOR_BLANCO)
 rect_titulo_menu = texto_titulo_menu.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA/2 - 150))
 
-# Botón "VOLVER"
-boton_volver = pg.Rect(cons.ANCHO_VENTANA/2 - 100, (cons.ALTO_VENTANA / 2) + 25, 200, 50)
+# 2. Botones del Menú (4 botones)
+boton_ranking = pg.Rect(cons.ANCHO_VENTANA/2 - 100, cons.ALTO_VENTANA / 2 + 45, 200, 50)
+boton_volumen = pg.Rect(cons.ANCHO_VENTANA/2 - 100, cons.ALTO_VENTANA / 2 + 105, 200, 50)
+boton_volver = pg.Rect(cons.ANCHO_VENTANA/2 - 100, cons.ALTO_VENTANA / 2 + 165, 200, 50)
+
+texto_boton_ranking = font_inicio.render("RANKING", True, cons.COLOR_NEGRO)
+texto_boton_volumen = font_inicio.render("VOLUMEN", True, cons.COLOR_NEGRO)
 texto_boton_volver = font_inicio.render("VOLVER", True, cons.COLOR_NEGRO)
-# (Reutilizaremos 'boton_salir' y 'texto_boton_salir' que ya existen)
+
+# --- Variables de los Botones de VOLUMEN ---
+ancho_boton_vol = 60
+espacio_boton_vol = 10
+
+# Posición Y alineada con el botón "VOLUMEN"
+boton_vol_bajo = pg.Rect(cons.ANCHO_VENTANA/2 + 110, cons.ALTO_VENTANA/ 2 + 105, ancho_boton_vol, 50)
+boton_vol_norm = pg.Rect(cons.ANCHO_VENTANA/2 + 110 + ancho_boton_vol + espacio_boton_vol, cons.ALTO_VENTANA/ 2 + 105, ancho_boton_vol, 50)
+boton_vol_fuerte = pg.Rect(cons.ANCHO_VENTANA/2 + 110 + (ancho_boton_vol + espacio_boton_vol) * 2, cons.ALTO_VENTANA/ 2 + 105, ancho_boton_vol, 50)
+
+# Textos (usamos una fuente más pequeña)
+font_volumen = pg.font.Font("assets/font/Colorfiction - Gothic - Regular.otf", 20)
+texto_vol_bajo = font_volumen.render("B", True, cons.COLOR_NEGRO)
+texto_vol_norm = font_volumen.render("N", True, cons.COLOR_NEGRO)
+texto_vol_fuerte = font_volumen.render("F", True, cons.COLOR_NEGRO)
 # -------------------------------------------------
 
 # pantalla de inicio
@@ -139,17 +158,29 @@ def pantalla_menu():
     # 1. Dibujar el fondo
     ventana.blit(imagen_fondo_menu, (0, 0))
 
-    # 2. Dibujar el título "MENU" (usa las variables globales)
+    # 2. Dibujar el título "MENU"
     ventana.blit(texto_titulo_menu, rect_titulo_menu)
 
-    # 3. Dibujar el botón "VOLVER"
+    # 3. Dibujar botones del menú
+    pg.draw.rect(ventana, cons.COLOR_BLANCO, boton_ranking)
+    ventana.blit(texto_boton_ranking, (boton_ranking.x + 50, boton_ranking.y + 10))
+
+    pg.draw.rect(ventana, cons.COLOR_BLANCO, boton_volumen)
+    ventana.blit(texto_boton_volumen, (boton_volumen.x + 50, boton_volumen.y + 10))
+
     pg.draw.rect(ventana, cons.COLOR_BLANCO, boton_volver)
     ventana.blit(texto_boton_volver, (boton_volver.x + 50, boton_volver.y + 10))
 
-    # 4. Dibujar el botón "SALIR" (Reutilizado)
-    # (Lo dibujamos en la misma posición Y que el 'salir' del inicio)
-    pg.draw.rect(ventana, cons.COLOR_ROJO, boton_salir)
-    ventana.blit(texto_boton_salir, (boton_salir.x + 50, boton_salir.y + 10))
+    # 4. Dibujar botones de volumen (SI ESTÁN ACTIVOS)
+    if mostrar_opciones_volumen:
+        pg.draw.rect(ventana, cons.COLOR_AMARILLO, boton_vol_bajo)
+        pg.draw.rect(ventana, cons.COLOR_AMARILLO, boton_vol_norm)
+        pg.draw.rect(ventana, cons.COLOR_AMARILLO, boton_vol_fuerte)
+
+        # Centrar texto "B", "N", "F"
+        ventana.blit(texto_vol_bajo, (boton_vol_bajo.x + 22, boton_vol_bajo.y + 12))
+        ventana.blit(texto_vol_norm, (boton_vol_norm.x + 22, boton_vol_norm.y + 12))
+        ventana.blit(texto_vol_fuerte, (boton_vol_fuerte.x + 22, boton_vol_fuerte.y + 12))
 
     # 5. Actualizar la pantalla
     pg.display.update()
@@ -298,12 +329,6 @@ with open("niveles/nivel_1.csv", newline="") as csv_file:
 world = md.Mundo()
 world.procesar_data(world_data, lista_tile, item_imagenes, animacion_enemigos) 
 
-# def dibujar_grid():
-#     for x in range(50):
-#         pg.draw.line(ventana, cons.COLOR_BLANCO, (x*cons.TAMANIO_TILES, 0), (x*cons.TAMANIO_TILES, cons.ALTO_VENTANA))
-#         pg.draw.line(ventana, cons.COLOR_BLANCO, (0, x*cons.TAMANIO_TILES), (cons.ANCHO_VENTANA, x*cons.TAMANIO_TILES))
-
-
 #crear un jugador de la clase personaje en posicion x , y
 jugador = per.Personaje (80, 80, animaciones, 80, 1)
 
@@ -339,6 +364,7 @@ prueba = True
 run = True
 mostrar_inicio = True
 mostrar_menu = False
+mostrar_opciones_volumen = False
 evitar_click_fantasma = False
 
 # estado de victoria
@@ -408,15 +434,30 @@ while run:
             if event.type == pg.QUIT:
                 run = False
             if event.type == pg.MOUSEBUTTONDOWN:
-                # Lógica del botón SALIR
-                if boton_salir.collidepoint(event.pos):
-                    run = False
                     # Lógica del botón VOLVER
-                elif boton_volver.collidepoint(event.pos):
+                if boton_volver.collidepoint(event.pos):
                     pg.mixer.music.load(cons.MUSICA_PRINCIPAL) # Carga la música original del menú
                     pg.mixer.music.play(-1) # Reproduce en loop
                     mostrar_menu = False
                     mostrar_inicio = True # Vuelve al inicio
+                    mostrar_opciones_volumen = False # Oculta el volumen al salir
+                # Lógica del botón VOLUMEN (mostrar/ocultar)
+                elif boton_volumen.collidepoint(event.pos):
+                    mostrar_opciones_volumen = not mostrar_opciones_volumen
+
+                # Lógica del botón RANKING (no hace nada)
+                elif boton_ranking.collidepoint(event.pos):
+                    print("Clic en Ranking (próximamente)") # Placeholder
+
+                    # Lógica de los botones B, N, F (si están visibles)
+                elif mostrar_opciones_volumen:
+                    if boton_vol_bajo.collidepoint(event.pos):
+                        print("Volumen BAJO seleccionado")
+                        # (Aquí irá la lógica de pg.mixer.music.set_volume)
+                    elif boton_vol_norm.collidepoint(event.pos):
+                        print("Volumen NORMAL seleccionado")
+                    elif boton_vol_fuerte.collidepoint(event.pos):
+                        print("Volumen FUERTE seleccionado")
 
     else:
             
