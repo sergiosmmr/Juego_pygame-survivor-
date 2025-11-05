@@ -61,11 +61,13 @@ font_score = pg.font.Font("assets/font/Ryga.ttf", cons.TAMANIO_FUENTE_SCORE)
 font_game_over = pg.font.Font("assets/font/Colorfiction - Gothic - Regular.otf", 110)
 font_reinicio = pg.font.Font("assets/font/Colorfiction - Gothic - Regular.otf", 30)
 
-font_inicio = pg.font.Font("assets/font/Colorfiction - Gothic - Regular.otf", 30)
-font_titulo = pg.font.Font("assets/font/Colorfiction - Gothic - Regular.otf", 80)
+font_inicio = pg.font.Font("assets/font/Halloweenpixels.ttf", 30)
+font_titulo = pg.font.Font("assets/font/Halloweenpixels.ttf", 100)
 
 game_over_text = font_game_over.render("GAME OVER", True, cons.COLOR_BLANCO)
 texto_boton_reinicio = font_reinicio.render("Reiniciar", True, cons.COLOR_NEGRO)
+
+texto_boton_salir_final = font_reinicio.render("Salir", True, cons.COLOR_BLANCO)
 
 #  Variables para ingreso de nombre 
 font_input = pg.font.Font("assets/font/Colorfiction - Gothic - Regular.otf", 28)
@@ -98,11 +100,12 @@ texto_boton_salir = font_inicio.render("SALIR", True, cons.COLOR_BLANCO)# cambia
 
 # pantalla de inicio
 def pantalla_inicio():
-    ventana.fill(cons.COLOR_SUELO)
+
+    ventana.blit(imagen_fondo_inicio, (0, 0))
 
     # Creo el texto y obtengo su ancho
     texto_titulo_str = "S U R V I V O R"
-    texto_surface = font_titulo.render(texto_titulo_str, True, cons.COLOR_BLANCO)
+    texto_surface = font_titulo.render(texto_titulo_str, True, cons.ROJO_OSCURO)
     ancho_texto = texto_surface.get_width()
 
     #  centrada
@@ -117,6 +120,17 @@ def pantalla_inicio():
     pg.display.update()
 
 ##############importar imagenes#############
+
+# Cargar y escalar imagen de fondo al tamaño de la ventana
+
+imagen_fondo_inicio = pg.image.load("assets/images/fondos_de_pantalla/fondo_inicio.webp").convert()
+imagen_fondo_inicio = pg.transform.scale(imagen_fondo_inicio, (cons.ANCHO_VENTANA, cons.ALTO_VENTANA))
+
+imagen_fondo_victoria = pg.image.load("assets/images/fondos_de_pantalla/imagen_fondo_victoria.png").convert()
+imagen_fondo_victoria = pg.transform.scale(imagen_fondo_victoria, (cons.ANCHO_VENTANA, cons.ALTO_VENTANA))
+
+imagen_fondo_derrota = pg.image.load("assets/images/fondos_de_pantalla/imagen_fondo_derrota.png").convert()
+imagen_fondo_derrota = pg.transform.scale(imagen_fondo_derrota, (cons.ANCHO_VENTANA, cons.ALTO_VENTANA))
 
 # energia
 corazon_vacio = cargar_imagen("assets/images/items/corazon_vacio_1.png", cons.ESCALA_CORAZONES)
@@ -474,9 +488,12 @@ while run:
                     pg.mixer.music.stop()
 
             # 2. Dibujar fondo y título (GAME OVER o ¡GANASTE!)
-            ventana.fill(cons.ROJO_OSCURO)
+            if mensaje_fin_juego == "¡GANASTE!":
+                ventana.blit(imagen_fondo_victoria, (0, 0))
+            else: # Será "GAME OVER"
+                ventana.blit(imagen_fondo_derrota, (0, 0))
             texto_renderizado = font_fin_juego.render(mensaje_fin_juego, True, cons.COLOR_BLANCO)
-            text_rect = texto_renderizado.get_rect(center = (cons.ANCHO_VENTANA/2, cons.ALTO_VENTANA/2))
+            text_rect = texto_renderizado.get_rect(center = (cons.ANCHO_VENTANA/2, cons.ALTO_VENTANA/2 - 100))
             ventana.blit(texto_renderizado, text_rect)
 
             # 3. Activar el input SÓLO después de 1 segundo de delay
@@ -497,17 +514,22 @@ while run:
             texto_input = font_input.render(nombre_jugador, True, cons.COLOR_BLANCO)
             ventana.blit(texto_input, (input_rect.x + 10, input_rect.y + 7))
 
-            # 5. Feedback de guardado
+            # 5. Feedback de guardado Y MOSTRAR BOTONES
             if puntaje_guardado:
                 msg_ok = font_input.render("¡Puntaje guardado!", True, cons.COLOR_BLANCO)
                 x_texto_guardado = input_rect.centerx - (msg_ok.get_width() // 2)
                 ventana.blit(msg_ok, (x_texto_guardado, input_rect.y + 45))
 
-            # 6. Botón de reinicio 
-            boton_reinicio = pg.Rect(cons.ANCHO_VENTANA/2 - 100, cons.ALTO_VENTANA/2 + 200, 200, 50)
-            pg.draw.rect(ventana, cons.COLOR_BLANCO, boton_reinicio)
-            ventana.blit(texto_boton_reinicio, (boton_reinicio.x + 50, boton_reinicio.y + 10))
-        
+                # 6. Botón de reinicio 
+                boton_reinicio = pg.Rect(cons.ANCHO_VENTANA/2 - 100, cons.ALTO_VENTANA/2 + 200, 200, 50)
+                pg.draw.rect(ventana, cons.COLOR_BLANCO, boton_reinicio)
+                ventana.blit(texto_boton_reinicio, (boton_reinicio.x + 50, boton_reinicio.y + 10))
+
+                # Botón de Salir (Final)
+                boton_salir_final = pg.Rect(cons.ANCHO_VENTANA/2 - 100, cons.ALTO_VENTANA/2 + 260, 200, 50)
+                pg.draw.rect(ventana, cons.COLOR_ROJO, boton_salir_final) # Rojo, como en el inicio
+                ventana.blit(texto_boton_salir_final, (boton_salir_final.x + 50, boton_salir_final.y + 10))
+            
         #  BUCLE DE EVENTOS  ---
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -566,47 +588,53 @@ while run:
             # LÓGICA DE CLICKS (MOUSEBUTTONDOWN) 
             if event.type == pg.MOUSEBUTTONDOWN:
                 if not jugador.vivo:
-                    # 1. Click en el botón REINICIAR
-                    if boton_reinicio.collidepoint(event.pos):
-                        # resetear estado del jugador
-                        jugador.vivo = True
-                        jugador.energia = 100
-                        jugador.score = 0
-                        nivel = 1
-
-                        # --- AÑADIDO: Resetear variables de input ---
-                        input_activo = False
-                        nombre_jugador = ""
-                        puntaje_guardado = False
-                        t_fin_juego = 0
-                        mensaje_fin_juego = "GAME OVER" # Resetea el título
-                        font_fin_juego = font_game_over # Resetea la fuente
+                    if puntaje_guardado:
+                        # 1. Click en el botón REINICIAR
+                        if boton_reinicio.collidepoint(event.pos):
+                            # resetear estado del jugador
+                            jugador.vivo = True
+                            jugador.energia = 100
+                            jugador.score = 0
+                            nivel = 1
                         
-                        # Limpiar grupos
-                        grupo_damage_text.empty()
-                        grupo_balas.empty()
-                        grupo_items.empty()
 
-                        # recargar mundo y enemigos
-                        world, lista_enemigos = cargar_world_y_enemigos(nivel, lista_tile, item_imagenes, animacion_enemigos)
-                        # reposicionar jugador
-                        jugador.actualizar_coordenadas(cons.COORDENADAS_ENEMIGO_NIVEL[str(nivel)])
-                        # agregar items
-                        for item in world.lista_item:
-                            grupo_items.add(item)
-                        
-                        # Reiniciar música
-                        pg.mixer.music.load(cons.MUSICA_JUEGO)
-                        pg.mixer.music.play(-1)
+                            # --- AÑADIDO: Resetear variables de input ---
+                            input_activo = False
+                            nombre_jugador = ""
+                            puntaje_guardado = False
+                            t_fin_juego = 0
+                            mensaje_fin_juego = "GAME OVER" # Resetea el título
+                            font_fin_juego = font_game_over # Resetea la fuente
+                            
+                            # Limpiar grupos
+                            grupo_damage_text.empty()
+                            grupo_balas.empty()
+                            grupo_items.empty()
 
-                    # 2. Click en la CAJA de input
-                    elif input_rect.collidepoint(event.pos):
-                        if pg.time.get_ticks() - t_fin_juego > 1000: # Solo activa si pasó el delay
-                            input_activo = True
-                    
-                    # 3. Click FUERA de la caja
+                            # recargar mundo y enemigos
+                            world, lista_enemigos = cargar_world_y_enemigos(nivel, lista_tile, item_imagenes, animacion_enemigos)
+                            # reposicionar jugador
+                            jugador.actualizar_coordenadas(cons.COORDENADAS_ENEMIGO_NIVEL[str(nivel)])
+                            # agregar items
+                            for item in world.lista_item:
+                                grupo_items.add(item)
+                            
+                            # Reiniciar música
+                            pg.mixer.music.load(cons.MUSICA_JUEGO)
+                            pg.mixer.music.play(-1)
+                        # 1b. Click en el botón SALIR (Final)
+                        elif boton_salir_final.collidepoint(event.pos):
+                            run = False
                     else:
-                        input_activo = False
+
+                        # 2. Click en la CAJA de input
+                        if input_rect.collidepoint(event.pos):
+                            if pg.time.get_ticks() - t_fin_juego > 1000: # Solo activa si pasó el delay
+                                input_activo = True
+                        
+                        # 3. Click FUERA de la caja
+                        else:
+                            input_activo = False
 
 
         pg.display.update()
