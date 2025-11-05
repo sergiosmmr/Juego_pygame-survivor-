@@ -5,7 +5,8 @@ import personaje as per
 NOMBRE_JUEGO = "FIRTS SURVIVOR"
 
 ######## MUSICA Y SONIDOS ###########
-MUSICA_MENU = "assets/sonidos/menu2.mp3"
+MUSICA_PRINCIPAL = "assets/sonidos/principal.mp3"
+MUSICA_MENU = "assets/sonidos/menu.mp3"
 MUSICA_JUEGO = "assets/sonidos/juego.mp3"
 MUSICA_VOLUMEN_BAJO = 0.25
 MUSICA_VOLUMEN_NORMAL = 0.5

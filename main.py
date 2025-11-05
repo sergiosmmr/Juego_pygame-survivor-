@@ -99,6 +99,18 @@ boton_salir = pg.Rect(cons.ANCHO_VENTANA/2 -100, cons.ALTO_VENTANA/2 +135, 200, 
 texto_boton_jugar = font_inicio.render("JUGAR", True, cons.COLOR_NEGRO)# cambiar fuente, no se lee bien
 texto_boton_menu = font_inicio.render("MENU", True, cons.COLOR_NEGRO)# cambiar fuente, no se lee bien
 texto_boton_salir = font_inicio.render("SALIR", True, cons.COLOR_BLANCO)# cambiar fuente, no se lee bien
+# Botones para la pantalla de MENÚ (usaremos la misma fuente)
+
+# --- ESTE BLOQUE PARA EL TÍTULO "MENU" ---
+# Título "MENU" 
+texto_titulo_menu = font_titulo.render("MENU", True, cons.COLOR_BLANCO)
+rect_titulo_menu = texto_titulo_menu.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA/2 - 150))
+
+# Botón "VOLVER"
+boton_volver = pg.Rect(cons.ANCHO_VENTANA/2 - 100, (cons.ALTO_VENTANA / 2) + 25, 200, 50)
+texto_boton_volver = font_inicio.render("VOLVER", True, cons.COLOR_NEGRO)
+# (Reutilizaremos 'boton_salir' y 'texto_boton_salir' que ya existen)
+# -------------------------------------------------
 
 # pantalla de inicio
 def pantalla_inicio():
@@ -123,12 +135,34 @@ def pantalla_inicio():
     ventana.blit(texto_boton_menu, (boton_menu.x + 50, boton_menu.y + 10))
     pg.display.update()
 
+def pantalla_menu():
+    # 1. Dibujar el fondo
+    ventana.blit(imagen_fondo_menu, (0, 0))
+
+    # 2. Dibujar el título "MENU" (usa las variables globales)
+    ventana.blit(texto_titulo_menu, rect_titulo_menu)
+
+    # 3. Dibujar el botón "VOLVER"
+    pg.draw.rect(ventana, cons.COLOR_BLANCO, boton_volver)
+    ventana.blit(texto_boton_volver, (boton_volver.x + 50, boton_volver.y + 10))
+
+    # 4. Dibujar el botón "SALIR" (Reutilizado)
+    # (Lo dibujamos en la misma posición Y que el 'salir' del inicio)
+    pg.draw.rect(ventana, cons.COLOR_ROJO, boton_salir)
+    ventana.blit(texto_boton_salir, (boton_salir.x + 50, boton_salir.y + 10))
+
+    # 5. Actualizar la pantalla
+    pg.display.update()
+
 ##############importar imagenes#############
 
 # Cargar y escalar imagen de fondo al tamaño de la ventana
 
 imagen_fondo_inicio = pg.image.load("assets/images/fondos_de_pantalla/fondo_inicio.webp").convert()
 imagen_fondo_inicio = pg.transform.scale(imagen_fondo_inicio, (cons.ANCHO_VENTANA, cons.ALTO_VENTANA))
+
+imagen_fondo_menu = pg.image.load("assets/images/fondos_de_pantalla/imagen_fondo_menu.jpg").convert()
+imagen_fondo_menu = pg.transform.scale(imagen_fondo_menu, (cons.ANCHO_VENTANA, cons.ALTO_VENTANA))
 
 imagen_fondo_victoria = pg.image.load("assets/images/fondos_de_pantalla/imagen_fondo_victoria.png").convert()
 imagen_fondo_victoria = pg.transform.scale(imagen_fondo_victoria, (cons.ANCHO_VENTANA, cons.ALTO_VENTANA))
@@ -304,6 +338,7 @@ reloj = pg.time.Clock()
 prueba = True
 run = True
 mostrar_inicio = True
+mostrar_menu = False
 evitar_click_fantasma = False
 
 # estado de victoria
@@ -345,7 +380,7 @@ while run:
     if mostrar_inicio:
         pantalla_inicio()
         if not pg.mixer.music.get_busy():
-            pg.mixer.music.load(cons.MUSICA_MENU)
+            pg.mixer.music.load(cons.MUSICA_PRINCIPAL)
             pg.mixer.music.play(-1)  # -1 = loop infinito
 
         for event in pg.event.get():
@@ -355,12 +390,33 @@ while run:
                 if boton_jugar.collidepoint(event.pos):
                     pg.mixer.music.load(cons.MUSICA_JUEGO)
                     pg.mixer.music.play(-1)
-
                     mostrar_inicio = False
                     evitar_click_fantasma = True
-                    ############################# arreglar que el clicks se borre y no dispare al iniciar el juego#######
+                elif boton_menu.collidepoint(event.pos):
+                    pg.mixer.music.load(cons.MUSICA_MENU) # Carga la nueva música
+                    pg.mixer.music.play(-1) # Reproduce en loop
+                    mostrar_inicio = False
+                    mostrar_menu = True # Activa el estado 'menu'
+                elif boton_salir.collidepoint(event.pos):
+                    run = False
+
+    elif mostrar_menu:
+        pantalla_menu() # Llama a la nueva función de DIBUJO
+
+        # Bucle de eventos del menú
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                run = False
+            if event.type == pg.MOUSEBUTTONDOWN:
+                # Lógica del botón SALIR
                 if boton_salir.collidepoint(event.pos):
                     run = False
+                    # Lógica del botón VOLVER
+                elif boton_volver.collidepoint(event.pos):
+                    pg.mixer.music.load(cons.MUSICA_PRINCIPAL) # Carga la música original del menú
+                    pg.mixer.music.play(-1) # Reproduce en loop
+                    mostrar_menu = False
+                    mostrar_inicio = True # Vuelve al inicio
 
     else:
             
