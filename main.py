@@ -185,6 +185,50 @@ def pantalla_menu():
     # 5. Actualizar la pantalla
     pg.display.update()
 
+
+# --- 1. AÑADE ESTA NUEVA FUNCIÓN COMPLETA ---
+def pantalla_fin_juego():
+    # 2. Dibujar fondo y título (GAME OVER o ¡GANASTE!)
+    if mensaje_fin_juego == "¡GANASTE!":
+        ventana.blit(imagen_fondo_victoria, (0, 0)) 
+    else: # Será "GAME OVER"
+        ventana.blit(imagen_fondo_derrota, (0, 0))
+
+    # Dibuja el texto (ya centrado)
+    texto_renderizado = font_fin_juego.render(mensaje_fin_juego, True, cons.COLOR_BLANCO)
+    text_rect = texto_renderizado.get_rect(center = (cons.ANCHO_VENTANA/2, cons.ALTO_VENTANA/2 - 100))
+    ventana.blit(texto_renderizado, text_rect)
+
+    # 4. Dibujar el input de nombre
+    # Label
+    x_label = input_rect.centerx - (label_nombre.get_width() // 2)
+    ventana.blit(label_nombre, (x_label, input_rect.y - 30))
+
+    # Campo de texto (color cambia si está activo o no)
+    if input_activo:
+        color_caja = color_activo
+    else:
+        color_caja = color_inactivo
+    pg.draw.rect(ventana, color_caja, input_rect, width=2)
+    texto_input = font_input.render(nombre_jugador, True, cons.COLOR_BLANCO)
+    ventana.blit(texto_input, (input_rect.x + 10, input_rect.y + 7))
+
+    # 5. Feedback de guardado Y MOSTRAR BOTONES
+    if puntaje_guardado:
+        msg_ok = font_input.render("¡Puntaje guardado!", True, cons.COLOR_BLANCO)
+        x_texto_guardado = input_rect.centerx - (msg_ok.get_width() // 2)
+        ventana.blit(msg_ok, (x_texto_guardado, input_rect.y + 45))
+
+        # 6. Botón de reinicio 
+        boton_reinicio = pg.Rect(cons.ANCHO_VENTANA/2 - 100, cons.ALTO_VENTANA/2 + 200, 200, 50)
+        pg.draw.rect(ventana, cons.COLOR_BLANCO, boton_reinicio)
+        ventana.blit(texto_boton_reinicio, (boton_reinicio.x + 50, boton_reinicio.y + 10))
+
+        # Botón de Salir (Final)
+        boton_salir_final = pg.Rect(cons.ANCHO_VENTANA/2 - 100, cons.ALTO_VENTANA/2 + 260, 200, 50)
+        pg.draw.rect(ventana, cons.COLOR_ROJO, boton_salir_final) # Rojo, como en el inicio
+        ventana.blit(texto_boton_salir_final, (boton_salir_final.x + 50, boton_salir_final.y + 10))
+
 ##############importar imagenes#############
 
 # Cargar y escalar imagen de fondo al tamaño de la ventana
@@ -403,7 +447,7 @@ while run:
 
         continue  # saltar el resto del frame mientras está la pantalla de victoria
 
-    if mostrar_inicio:
+    elif mostrar_inicio:
         pantalla_inicio()
         if not pg.mixer.music.get_busy():
             pg.mixer.music.load(cons.MUSICA_PRINCIPAL)
@@ -592,40 +636,20 @@ while run:
         # LÓGICA DE FIN DE JUEGO (SI NO ESTÁ VIVO)
         else:
             # --- LÓGICA DE FIN DE JUEGO (GAME OVER O VICTORIA) ---
-            
-            # 1. Iniciar temporizador 
+
+            # 1. Iniciar temporizador (Esto es LÓGICA, se queda aquí)
             if t_fin_juego == 0:
                 t_fin_juego = pg.time.get_ticks()
                 pg.event.clear() # Limpia teclas 
                 if pg.mixer.music.get_busy(): # Parar música
                     pg.mixer.music.stop()
 
-            # 2. Dibujar fondo y título (GAME OVER o ¡GANASTE!)
-            if mensaje_fin_juego == "¡GANASTE!":
-                ventana.blit(imagen_fondo_victoria, (0, 0))
-            else: # Será "GAME OVER"
-                ventana.blit(imagen_fondo_derrota, (0, 0))
-            texto_renderizado = font_fin_juego.render(mensaje_fin_juego, True, cons.COLOR_BLANCO)
-            text_rect = texto_renderizado.get_rect(center = (cons.ANCHO_VENTANA/2, cons.ALTO_VENTANA/2 - 100))
-            ventana.blit(texto_renderizado, text_rect)
-
-            # 3. Activar el input SÓLO después de 1 segundo de delay
+            # 3. Activar el input (Esto es LÓGICA, se queda aquí)
             if not input_activo and (pg.time.get_ticks() - t_fin_juego > 1000): # 1000ms = 1 seg
                 input_activo = True
 
-            # 4. Dibujar el input de nombre
-            # Label
-            x_label = input_rect.centerx - (label_nombre.get_width() // 2)
-            ventana.blit(label_nombre, (x_label, input_rect.y - 30))
-            
-            # Campo de texto (color cambia si está activo o no)
-            if input_activo:
-                color_caja = color_activo
-            else:
-                color_caja = color_inactivo
-            pg.draw.rect(ventana, color_caja, input_rect, width=2)
-            texto_input = font_input.render(nombre_jugador, True, cons.COLOR_BLANCO)
-            ventana.blit(texto_input, (input_rect.x + 10, input_rect.y + 7))
+            # 4. Llamar a la función de DIBUJO
+            pantalla_fin_juego()
 
             # 5. Feedback de guardado Y MOSTRAR BOTONES
             if puntaje_guardado:
