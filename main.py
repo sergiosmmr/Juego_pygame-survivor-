@@ -93,9 +93,11 @@ rect_ganaste = texto_ganaste.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO
 
 
 # botones de inicio
-boton_jugar = pg.Rect(cons.ANCHO_VENTANA/2 -100, cons.ALTO_VENTANA/2 -50, 200, 50)
-boton_salir = pg.Rect(cons.ANCHO_VENTANA/2 -100, cons.ALTO_VENTANA/2 +50, 200, 50)
+boton_jugar = pg.Rect(cons.ANCHO_VENTANA/2 -100, cons.ALTO_VENTANA/2 +15, 200, 50)
+boton_menu = pg.Rect(cons.ANCHO_VENTANA/2 -100, cons.ALTO_VENTANA/2 +75, 200, 50)
+boton_salir = pg.Rect(cons.ANCHO_VENTANA/2 -100, cons.ALTO_VENTANA/2 +135, 200, 50)
 texto_boton_jugar = font_inicio.render("JUGAR", True, cons.COLOR_NEGRO)# cambiar fuente, no se lee bien
+texto_boton_menu = font_inicio.render("MENU", True, cons.COLOR_NEGRO)# cambiar fuente, no se lee bien
 texto_boton_salir = font_inicio.render("SALIR", True, cons.COLOR_BLANCO)# cambiar fuente, no se lee bien
 
 # pantalla de inicio
@@ -115,8 +117,10 @@ def pantalla_inicio():
     ventana.blit(texto_surface, (x_centrada, cons.ALTO_VENTANA/2 - 200))
     pg.draw.rect(ventana, cons.COLOR_AMARILLO, boton_jugar)
     pg.draw.rect(ventana, cons.COLOR_ROJO, boton_salir)
+    pg.draw.rect(ventana, cons.COLOR_BLANCO, boton_menu)
     ventana.blit(texto_boton_jugar, (boton_jugar.x + 50, boton_jugar.y + 10))
     ventana.blit(texto_boton_salir, (boton_salir.x + 50, boton_salir.y + 10))
+    ventana.blit(texto_boton_menu, (boton_menu.x + 50, boton_menu.y + 10))
     pg.display.update()
 
 ##############importar imagenes#############
