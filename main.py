@@ -124,6 +124,14 @@ boton_vol_bajo = pg.Rect(cons.ANCHO_VENTANA/2 + 110, cons.ALTO_VENTANA/ 2 + 105,
 boton_vol_norm = pg.Rect(cons.ANCHO_VENTANA/2 + 110 + ancho_boton_vol + espacio_boton_vol, cons.ALTO_VENTANA/ 2 + 105, ancho_boton_vol, 50)
 boton_vol_fuerte = pg.Rect(cons.ANCHO_VENTANA/2 + 110 + (ancho_boton_vol + espacio_boton_vol) * 2, cons.ALTO_VENTANA/ 2 + 105, ancho_boton_vol, 50)
 
+# ... (después de las variables de los botones de VOLUMEN) ...
+
+# --- Variables de la Pantalla de RANKING ---
+texto_titulo_ranking = font_titulo.render("RANKING", True, cons.COLOR_BLANCO)
+rect_titulo_ranking = texto_titulo_ranking.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA/2 - 250)) #Posición del título
+# (Reutilizaremos 'boton_volver' y 'texto_boton_volver' del menú)
+# (Usaremos 'font_reinicio' para los puntajes, que ya está cargada)
+
 # Textos (usamos una fuente más pequeña)
 font_volumen = pg.font.Font("assets/font/Colorfiction - Gothic - Regular.otf", 20)
 texto_vol_bajo = font_volumen.render("B", True, cons.COLOR_NEGRO)
@@ -185,8 +193,53 @@ def pantalla_menu():
     # 5. Actualizar la pantalla
     pg.display.update()
 
+def pantalla_ranking():
+    # 1. Dibujar el fondo
+    ventana.blit(imagen_fondo_menu, (0, 0)) # Reutiliza el fondo del menú
 
-# --- 1. AÑADE ESTA NUEVA FUNCIÓN COMPLETA ---
+    # 2. Dibujar el título "RANKING"
+    ventana.blit(texto_titulo_ranking, rect_titulo_ranking)
+
+    # 3. Cargar y dibujar los puntajes
+    scores = cargar_scores()
+    base_y = (cons.ALTO_VENTANA // 2) - 150
+    
+    if not scores:
+        # Mensaje si no hay puntajes
+        no_scores_text = font_reinicio.render("No hay puntajes guardados", True, cons.COLOR_BLANCO)
+        no_scores_rect = no_scores_text.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA // 2 - 20))
+        ventana.blit(no_scores_text, no_scores_rect)
+    else:
+        # Dibujar encabezados
+        header_name = font_reinicio.render("NOMBRE", True, cons.COLOR_AMARILLO)
+        header_score = font_reinicio.render("PUNTAJE", True, cons.COLOR_AMARILLO)
+        ventana.blit(header_name, (cons.ANCHO_VENTANA // 2 - 150, base_y))
+        ventana.blit(header_score, (cons.ANCHO_VENTANA // 2 + 50, base_y))
+
+        # Dibujar cada puntaje
+        y_offset = 40
+        for i, (nombre, score) in enumerate(scores):
+            # Posición Y para esta fila
+            y_pos = base_y + y_offset
+            
+            # Dibuja el Nombre
+            score_name = font_reinicio.render(f"{i+1}. {nombre}", True, cons.COLOR_BLANCO)
+            ventana.blit(score_name, (cons.ANCHO_VENTANA // 2 - 150, y_pos))
+            
+            # Dibuja el Puntaje
+            score_val = font_reinicio.render(str(score), True, cons.COLOR_BLANCO)
+            ventana.blit(score_val, (cons.ANCHO_VENTANA // 2 + 50, y_pos))
+            
+            y_offset += 40 # Aumenta el espacio para la siguiente fila
+
+    # 4. Dibujar el botón "VOLVER" (Reutilizado del menú)
+    pg.draw.rect(ventana, cons.COLOR_BLANCO, boton_volver)
+    ventana.blit(texto_boton_volver, (boton_volver.x + 50, boton_volver.y + 10))
+
+    # 5. Actualizar la pantalla
+    pg.display.update()
+
+
 def pantalla_fin_juego():
     # 2. Dibujar fondo y título (GAME OVER o ¡GANASTE!)
     if mensaje_fin_juego == "¡GANASTE!":
@@ -334,6 +387,17 @@ def resetear_mundo():
         data.append(filas)
     return data
 
+def aplicar_volumen(vol_musica, vol_sonido):
+    """
+    Aplica el volumen seleccionado a la música y a todos los sonidos.
+    """
+    # 1. Aplica a la música (la que esté sonando)
+    pg.mixer.music.set_volume(vol_musica)
+    # 2. Aplica al sonido del disparo (que ya está creado)
+    sonido_disparo.set_volume(vol_sonido)
+    
+    print(f"Volumen aplicado: Música={vol_musica}, Sonidos={vol_sonido}")
+
 # funciones de nivel / mundo  
 def leer_csv_nivel(nivel):
     # lee el CSV del nivel y devuelve la matriz world_data
@@ -356,6 +420,32 @@ def cargar_world_y_enemigos(nivel, lista_tile, item_imagenes, animacion_enemigos
         lista_enemigos_local.append(ene)
 
     return world_local, lista_enemigos_local
+# ... (después de la función cargar_world_y_enemigos) ...
+
+def cargar_scores():
+    scores_list = []
+    # Primero, revisa si el archivo existe
+    if not os.path.isfile(SCORES_FILE):
+        return [] # Devuelve una lista vacía si no hay archivo
+
+    try:
+        with open(SCORES_FILE, "r", newline="", encoding="utf-8") as f:
+            reader = csv.reader(f)
+            next(reader) # Salta el encabezado ("nombre", "score")
+            for row in reader:
+                if row: # Asegura que la fila no esté vacía
+                    scores_list.append((row[0], int(row[1]))) # Guarda (Nombre, Puntaje como NÚMERO)
+    except Exception as e:
+        print(f"Error al leer scores.csv: {e}")
+        return [] # Devuelve vacío si hay un error
+
+    # Ordena la lista. 
+    # 'key=lambda item: item[1]' le dice que ordene usando el segundo elemento (el puntaje)
+    # 'reverse=True' hace que el más alto quede primero
+    scores_list.sort(key=lambda item: item[1], reverse=True)
+    
+    # Devuelve solo los 5 mejores puntajes
+    return scores_list[:5]
 
 
 world_data = []
@@ -409,6 +499,7 @@ run = True
 mostrar_inicio = True
 mostrar_menu = False
 mostrar_opciones_volumen = False
+mostrar_ranking = False
 evitar_click_fantasma = False
 
 # estado de victoria
@@ -491,17 +582,32 @@ while run:
 
                 # Lógica del botón RANKING (no hace nada)
                 elif boton_ranking.collidepoint(event.pos):
-                    print("Clic en Ranking (próximamente)") # Placeholder
+                    mostrar_menu = False
+                    mostrar_ranking = True
 
-                    # Lógica de los botones B, N, F (si están visibles)
+                # Lógica de los botones B, N, F (si están visibles)
                 elif mostrar_opciones_volumen:
                     if boton_vol_bajo.collidepoint(event.pos):
-                        print("Volumen BAJO seleccionado")
-                        # (Aquí irá la lógica de pg.mixer.music.set_volume)
+                        aplicar_volumen(cons.MUSICA_VOLUMEN_BAJO, cons.SONIDO_DISPARO_BAJO)
+
                     elif boton_vol_norm.collidepoint(event.pos):
-                        print("Volumen NORMAL seleccionado")
+                        aplicar_volumen(cons.MUSICA_VOLUMEN_NORMAL, cons.SONIDO_DISPARO_NORMAL)
+
                     elif boton_vol_fuerte.collidepoint(event.pos):
-                        print("Volumen FUERTE seleccionado")
+                        aplicar_volumen(cons.MUSICA_VOLUMEN_FUERTE, cons.SONIDO_DISPARO_FUERTE)
+    
+    elif mostrar_ranking:
+        pantalla_ranking() # Llama a la función de DIBUJO
+
+        # Bucle de eventos del ranking
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                run = False
+            if event.type == pg.MOUSEBUTTONDOWN:
+                # Lógica del botón VOLVER (reutilizado)
+                if boton_volver.collidepoint(event.pos):
+                    mostrar_ranking = False
+                    mostrar_menu = True
 
     else:
             
@@ -666,7 +772,7 @@ while run:
                 boton_salir_final = pg.Rect(cons.ANCHO_VENTANA/2 - 100, cons.ALTO_VENTANA/2 + 260, 200, 50)
                 pg.draw.rect(ventana, cons.COLOR_ROJO, boton_salir_final) # Rojo, como en el inicio
                 ventana.blit(texto_boton_salir_final, (boton_salir_final.x + 50, boton_salir_final.y + 10))
-            
+            ###########################primer dragon no me quita vida, corregir##########################3
         #  BUCLE DE EVENTOS  ---
         for event in pg.event.get():
             if event.type == pg.QUIT:
