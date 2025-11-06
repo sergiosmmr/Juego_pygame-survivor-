@@ -7,7 +7,7 @@ import texto as tx
 import items as ts
 import mundo as md
 import csv
-
+import enemigo as ene
 
 pg.init()
 pg.mixer.init()
