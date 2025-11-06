@@ -31,6 +31,8 @@ class Personaje():
         self.tipo = tipo
         self.golpe = False
         self.ultimo_golpe = pg.time.get_ticks()
+        self.golpe_cooldown = 1000 
+        self.cooldown_animacion = 100
 
     def actualizar_coordenadas (self, tupla):
         self.forma.center = (tupla[0], tupla[1])
@@ -132,16 +134,13 @@ class Personaje():
             self.energia = 0
             self.vivo = False
         # timer para poder volver a recibir daño
-        golpe_cooldown = 1000
         if self.tipo == 1:
             if self.golpe == True:
-                if pg.time.get_ticks() - self.ultimo_golpe > golpe_cooldown:
+                if pg.time.get_ticks() - self.ultimo_golpe > self.golpe_cooldown:
                     self.golpe = False
                     
-           
-        cooldown_animacion = 100
         self.image = self.animaciones[self.frame_index]   
-        if pg.time.get_ticks() - self.update_time >= cooldown_animacion:
+        if pg.time.get_ticks() - self.update_time >= self.cooldown_animacion:
             self.frame_index += 1
             self.update_time = pg.time.get_ticks()
         if self.frame_index >= len(self.animaciones):
@@ -150,5 +149,4 @@ class Personaje():
     def dibujar (self, interfaz):
         imagen_flip = pg.transform.flip (self.image, self.flip, False)
         interfaz.blit(imagen_flip, self.forma)
-        #dibuja el personaje en la superficie especificada
-        #pg.draw.rect(interfaz, cons.COLOR_AMARILLO, self.forma, width=1)
+        

@@ -9,34 +9,6 @@ import mundo as md
 import csv
 
 
-
-#######  FUNCIONES  ########
-
-#  escalar imagen
-def escalar_img(image, scale):
-    w = image.get_width()
-    h = image.get_height()
-    # uso de scale con casteo a int para evitar errores de tipo
-    nueva_imagen = pg.transform.scale(image, (int(w * scale), int(h * scale)))
-    return nueva_imagen
-
-# funcion para contar elementos
-def contar_elementos (directorio):
-    return len (os.listdir(directorio)) 
-
-#funcion listar elementos
-def nombre_carpetas(directorio):
-    return os.listdir(directorio)
-
-# NUEVO: carga con convert_alpha() y escala opcional
-def cargar_imagen(path, escala=None):
-    img = pg.image.load(path).convert_alpha()
-    if escala is not None:
-        img = escalar_img(img, escala)
-    return img
-
-
-
 pg.init()
 pg.mixer.init()
 
@@ -54,90 +26,68 @@ pg.mixer.music.set_volume(cons.MUSICA_VOLUMEN_NORMAL)  # volumen medio
 sonido_disparo = pg.mixer.Sound(cons.SONIDO_DISPARO)  
 sonido_disparo.set_volume(cons.SONIDO_DISPARO_NORMAL)  # Ajusto el volumen 
 
-##### FUENTES ######
-font = pg.font.Font("assets/font/Ryga.ttf", cons.TAMANIO_FUENTE_ENEMIGOS)
-font_score = pg.font.Font("assets/font/Ryga.ttf", cons.TAMANIO_FUENTE_SCORE)
 
-font_game_over = pg.font.Font("assets/font/Colorfiction - Gothic - Regular.otf", 110)
-font_reinicio = pg.font.Font("assets/font/Colorfiction - Gothic - Regular.otf", 30)
+#######################  FUNCIONES  #######################
 
-font_inicio = pg.font.Font("assets/font/Halloweenpixels.ttf", 30)
-font_titulo = pg.font.Font("assets/font/Halloweenpixels.ttf", 100)
+#  escalar imagen
+def escalar_img(image, scale):
+    w = image.get_width()
+    h = image.get_height()
+    # uso de scale con casteo a int para evitar errores de tipo
+    nueva_imagen = pg.transform.scale(image, (int(w * scale), int(h * scale)))
+    return nueva_imagen
 
-game_over_text = font_game_over.render("GAME OVER", True, cons.COLOR_BLANCO)
-texto_boton_reinicio = font_reinicio.render("Reiniciar", True, cons.COLOR_NEGRO)
+# funcion para contar elementos
+def contar_elementos (directorio):
+    return len (os.listdir(directorio)) 
 
-texto_boton_salir_final = font_reinicio.render("Salir", True, cons.COLOR_BLANCO)
+#funcion listar elementos
+def nombre_carpetas(directorio):
+    return os.listdir(directorio)
 
-#  Variables para ingreso de nombre 
-font_input = pg.font.Font("assets/font/Colorfiction - Gothic - Regular.otf", 28)
-label_nombre = font_input.render("Ingresá tus iniciales (3) y presiona ENTER:", True, cons.COLOR_BLANCO)
+# vargar elemneto
+def cargar_imagen(path, escala=None):
+    img = pg.image.load(path).convert_alpha()
+    if escala is not None:
+        img = escalar_img(img, escala)
+    return img
 
-input_rect = pg.Rect(cons.ANCHO_VENTANA//2 - 80, cons.ALTO_VENTANA//2 + 100, 160, 40)
-color_inactivo = (cons.COLOR_NEGRO)
-color_activo = (cons.COLOR_BLANCO)
+# carga de imagenes de sprites
+def cargar_set_animaciones(directorio_principal, escala):
+    """
+    Carga, ordena y escala múltiples sets de animaciones desde las 
+    subcarpetas de un directorio principal.
+    
+    Devuelve una lista de listas 
+    """
+    lista_principal = []
+    # Lee las subcarpetas 
+    tipo_personajes = nombre_carpetas(directorio_principal) 
 
-SCORES_FILE = "scores.csv"   # Archivo donde se guardará
+    for tipo in tipo_personajes:
+        lista_temporal = []
+        # Crea la ruta a la subcarpeta 
+        ruta_temporal = os.path.join(directorio_principal, tipo)
+        
+        # Nos aseguramos de que sea un directorio antes de leerlo
+        if not os.path.isdir(ruta_temporal):
+            continue
 
-# AÑADIDO: Variables de estado para el input 
-mensaje_fin_juego = "GAME OVER" # Cambiará a "¡GANASTE!" si ganas
-font_fin_juego = font_game_over # Para usar la fuente grande o la de título
-input_activo = False
-nombre_jugador = ""
-puntaje_guardado = False
-t_fin_juego = 0 # Temporizador para el delay
+        # Lee los frames 
+        nombres_de_archivos = nombre_carpetas(ruta_temporal)
+        nombres_de_archivos.sort() # Ordena los frames
 
-# pantalla de victoria 
-texto_ganaste = font_titulo.render("¡GANASTE!", True, cons.COLOR_BLANCO)
-rect_ganaste = texto_ganaste.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA // 2))
-
-
-# botones de inicio
-boton_jugar = pg.Rect(cons.ANCHO_VENTANA/2 -100, cons.ALTO_VENTANA/2 +15, 200, 50)
-boton_menu = pg.Rect(cons.ANCHO_VENTANA/2 -100, cons.ALTO_VENTANA/2 +75, 200, 50)
-boton_salir = pg.Rect(cons.ANCHO_VENTANA/2 -100, cons.ALTO_VENTANA/2 +135, 200, 50)
-texto_boton_jugar = font_inicio.render("JUGAR", True, cons.COLOR_NEGRO)# cambiar fuente, no se lee bien
-texto_boton_menu = font_inicio.render("MENU", True, cons.COLOR_NEGRO)# cambiar fuente, no se lee bien
-texto_boton_salir = font_inicio.render("SALIR", True, cons.COLOR_BLANCO)# cambiar fuente, no se lee bien
-
-# --- Variables de la Pantalla de MENÚ ---
-
-# 1. Título "MENU" 
-texto_titulo_menu = font_titulo.render("MENU", True, cons.COLOR_BLANCO)
-rect_titulo_menu = texto_titulo_menu.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA/2 - 150))
-
-# 2. Botones del Menú (4 botones)
-boton_ranking = pg.Rect(cons.ANCHO_VENTANA/2 - 100, cons.ALTO_VENTANA / 2 + 45, 200, 50)
-boton_volumen = pg.Rect(cons.ANCHO_VENTANA/2 - 100, cons.ALTO_VENTANA / 2 + 105, 200, 50)
-boton_volver = pg.Rect(cons.ANCHO_VENTANA/2 - 100, cons.ALTO_VENTANA / 2 + 165, 200, 50)
-
-texto_boton_ranking = font_inicio.render("RANKING", True, cons.COLOR_NEGRO)
-texto_boton_volumen = font_inicio.render("VOLUMEN", True, cons.COLOR_NEGRO)
-texto_boton_volver = font_inicio.render("VOLVER", True, cons.COLOR_NEGRO)
-
-# --- Variables de los Botones de VOLUMEN ---
-ancho_boton_vol = 60
-espacio_boton_vol = 10
-
-# Posición Y alineada con el botón "VOLUMEN"
-boton_vol_bajo = pg.Rect(cons.ANCHO_VENTANA/2 + 110, cons.ALTO_VENTANA/ 2 + 105, ancho_boton_vol, 50)
-boton_vol_norm = pg.Rect(cons.ANCHO_VENTANA/2 + 110 + ancho_boton_vol + espacio_boton_vol, cons.ALTO_VENTANA/ 2 + 105, ancho_boton_vol, 50)
-boton_vol_fuerte = pg.Rect(cons.ANCHO_VENTANA/2 + 110 + (ancho_boton_vol + espacio_boton_vol) * 2, cons.ALTO_VENTANA/ 2 + 105, ancho_boton_vol, 50)
-
-# ... (después de las variables de los botones de VOLUMEN) ...
-
-# --- Variables de la Pantalla de RANKING ---
-texto_titulo_ranking = font_titulo.render("RANKING", True, cons.COLOR_BLANCO)
-rect_titulo_ranking = texto_titulo_ranking.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA/2 - 250)) #Posición del título
-# (Reutilizaremos 'boton_volver' y 'texto_boton_volver' del menú)
-# (Usaremos 'font_reinicio' para los puntajes, que ya está cargada)
-
-# Textos (usamos una fuente más pequeña)
-font_volumen = pg.font.Font("assets/font/Colorfiction - Gothic - Regular.otf", 20)
-texto_vol_bajo = font_volumen.render("B", True, cons.COLOR_NEGRO)
-texto_vol_norm = font_volumen.render("N", True, cons.COLOR_NEGRO)
-texto_vol_fuerte = font_volumen.render("F", True, cons.COLOR_NEGRO)
-# -------------------------------------------------
+        for nombre_archivo in nombres_de_archivos:
+            # Crea la ruta completa al archivo
+            ruta_completa = os.path.join(ruta_temporal, nombre_archivo)
+            # Carga la imagen 
+            imagen = cargar_imagen(ruta_completa, escala)
+            lista_temporal.append(imagen)
+        
+        # Añade la lista de este personaje a la lista principal
+        lista_principal.append(lista_temporal)
+        
+    return lista_principal
 
 # pantalla de inicio
 def pantalla_inicio():
@@ -282,6 +232,90 @@ def pantalla_fin_juego():
         pg.draw.rect(ventana, cons.COLOR_ROJO, boton_salir_final) # Rojo, como en el inicio
         ventana.blit(texto_boton_salir_final, (boton_salir_final.x + 50, boton_salir_final.y + 10))
 
+##########################      FUENTES      ###########################
+font = pg.font.Font("assets/font/Ryga.ttf", cons.TAMANIO_FUENTE_ENEMIGOS)
+font_score = pg.font.Font("assets/font/Ryga.ttf", cons.TAMANIO_FUENTE_SCORE)
+
+font_game_over = pg.font.Font("assets/font/Colorfiction - Gothic - Regular.otf", 110)
+font_reinicio = pg.font.Font("assets/font/Colorfiction - Gothic - Regular.otf", 30)
+
+font_inicio = pg.font.Font("assets/font/Halloweenpixels.ttf", 30)
+font_titulo = pg.font.Font("assets/font/Halloweenpixels.ttf", 100)
+
+game_over_text = font_game_over.render("GAME OVER", True, cons.COLOR_BLANCO)
+texto_boton_reinicio = font_reinicio.render("Reiniciar", True, cons.COLOR_NEGRO)
+
+texto_boton_salir_final = font_reinicio.render("Salir", True, cons.COLOR_BLANCO)
+
+#  Variables para ingreso de nombre 
+font_input = pg.font.Font("assets/font/Colorfiction - Gothic - Regular.otf", 28)
+label_nombre = font_input.render("Ingresá tus iniciales (3) y presiona ENTER:", True, cons.COLOR_BLANCO)
+
+input_rect = pg.Rect(cons.ANCHO_VENTANA//2 - 80, cons.ALTO_VENTANA//2 + 100, 160, 40)
+color_inactivo = (cons.COLOR_NEGRO)
+color_activo = (cons.COLOR_BLANCO)
+
+
+# AÑADIDO: Variables de estado para el input 
+mensaje_fin_juego = "GAME OVER" # Cambiará a "¡GANASTE!" si ganas
+font_fin_juego = font_game_over # Para usar la fuente grande o la de título
+input_activo = False
+nombre_jugador = ""
+puntaje_guardado = False
+t_fin_juego = 0 # Temporizador para el delay
+
+# pantalla de victoria 
+texto_ganaste = font_titulo.render("¡GANASTE!", True, cons.COLOR_BLANCO)
+rect_ganaste = texto_ganaste.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA // 2))
+
+
+# botones de inicio
+boton_jugar = pg.Rect(cons.ANCHO_VENTANA/2 -100, cons.ALTO_VENTANA/2 +15, 200, 50)
+boton_menu = pg.Rect(cons.ANCHO_VENTANA/2 -100, cons.ALTO_VENTANA/2 +75, 200, 50)
+boton_salir = pg.Rect(cons.ANCHO_VENTANA/2 -100, cons.ALTO_VENTANA/2 +135, 200, 50)
+texto_boton_jugar = font_inicio.render("JUGAR", True, cons.COLOR_NEGRO)# cambiar fuente, no se lee bien
+texto_boton_menu = font_inicio.render("MENU", True, cons.COLOR_NEGRO)# cambiar fuente, no se lee bien
+texto_boton_salir = font_inicio.render("SALIR", True, cons.COLOR_BLANCO)# cambiar fuente, no se lee bien
+
+# --- Variables de la Pantalla de MENÚ ---
+
+# 1. Título "MENU" 
+texto_titulo_menu = font_titulo.render("MENU", True, cons.COLOR_BLANCO)
+rect_titulo_menu = texto_titulo_menu.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA/2 - 150))
+
+# 2. Botones del Menú (4 botones)
+boton_ranking = pg.Rect(cons.ANCHO_VENTANA/2 - 100, cons.ALTO_VENTANA / 2 + 45, 200, 50)
+boton_volumen = pg.Rect(cons.ANCHO_VENTANA/2 - 100, cons.ALTO_VENTANA / 2 + 105, 200, 50)
+boton_volver = pg.Rect(cons.ANCHO_VENTANA/2 - 100, cons.ALTO_VENTANA / 2 + 165, 200, 50)
+
+texto_boton_ranking = font_inicio.render("RANKING", True, cons.COLOR_NEGRO)
+texto_boton_volumen = font_inicio.render("VOLUMEN", True, cons.COLOR_NEGRO)
+texto_boton_volver = font_inicio.render("VOLVER", True, cons.COLOR_NEGRO)
+
+# --- Variables de los Botones de VOLUMEN ---
+ancho_boton_vol = 60
+espacio_boton_vol = 10
+
+# Posición Y alineada con el botón "VOLUMEN"
+boton_vol_bajo = pg.Rect(cons.ANCHO_VENTANA/2 + 110, cons.ALTO_VENTANA/ 2 + 105, ancho_boton_vol, 50)
+boton_vol_norm = pg.Rect(cons.ANCHO_VENTANA/2 + 110 + ancho_boton_vol + espacio_boton_vol, cons.ALTO_VENTANA/ 2 + 105, ancho_boton_vol, 50)
+boton_vol_fuerte = pg.Rect(cons.ANCHO_VENTANA/2 + 110 + (ancho_boton_vol + espacio_boton_vol) * 2, cons.ALTO_VENTANA/ 2 + 105, ancho_boton_vol, 50)
+
+# ... (después de las variables de los botones de VOLUMEN) ...
+
+# --- Variables de la Pantalla de RANKING ---
+texto_titulo_ranking = font_titulo.render("RANKING", True, cons.COLOR_BLANCO)
+rect_titulo_ranking = texto_titulo_ranking.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA/2 - 250)) #Posición del título
+# (Reutilizaremos 'boton_volver' y 'texto_boton_volver' del menú)
+# (Usaremos 'font_reinicio' para los puntajes, que ya está cargada)
+
+# Textos (usamos una fuente más pequeña)
+font_volumen = pg.font.Font("assets/font/Colorfiction - Gothic - Regular.otf", 20)
+texto_vol_bajo = font_volumen.render("B", True, cons.COLOR_NEGRO)
+texto_vol_norm = font_volumen.render("N", True, cons.COLOR_NEGRO)
+texto_vol_fuerte = font_volumen.render("F", True, cons.COLOR_NEGRO)
+# -------------------------------------------------
+
 ##############importar imagenes#############
 
 # Cargar y escalar imagen de fondo al tamaño de la ventana
@@ -303,37 +337,21 @@ corazon_vacio = cargar_imagen("assets/images/items/corazon_vacio_1.png", cons.ES
 corazon_medio = cargar_imagen("assets/images/items/corazon_mitad_1.png", cons.ESCALA_CORAZONES)
 corazon_lleno = cargar_imagen("assets/images/items/corazon_lleno_1.png", cons.ESCALA_CORAZONES)
 
-#personaje
-animaciones = []
-for i in range(7):
-    img = cargar_imagen(f"assets/images/characters/players/necro_mov_{i+1}.png", cons.ESCALA_PERSONAJE)
-    animaciones.append(img)
+# --- Cargar animaciones de JUGADORES ---
+directorio_jugadores = "assets/images/characters/players"
+# Esto cargará 'players/necro/...' y si un día agregás 'players/mago/...'
+# también lo cargará automáticamente.
+sets_anim_jugadores = cargar_set_animaciones(directorio_jugadores, cons.ESCALA_PERSONAJE)
 
-directorio_enemigos = ("assets/images/characters/enemigos") 
-tipo_enemigos = nombre_carpetas(directorio_enemigos)
+# Como solo tenés un jugador ('necro'), tus 'animaciones' son el primer (y único) set
+# en la lista que devolvió la función.
+animaciones = sets_anim_jugadores[0] 
 
-# realizamos la animacion del enemigo
-animacion_enemigos = []
-for eni in tipo_enemigos:
-    lista_temporal = []
-    ruta_temporal = f"assets/images/characters/enemigos/{eni}" 
-    
-    # 1. Obtenemos la lista de nombres de archivo REALES
-    nombres_de_archivos = nombre_carpetas(ruta_temporal)
-    
-    # 2. Los ordenamos para que la animación (0, 1, 2, 3...) sea correcta
-    nombres_de_archivos.sort()
 
-    # 3. Iteramos sobre los nombres reales, no sobre un rango
-    for nombre_archivo in nombres_de_archivos:
-        # Construimos la ruta completa al archivo
-        ruta_completa = f"{ruta_temporal}/{nombre_archivo}"
-        
-        # Cargamos la imagen usando esa ruta
-        imagen_enemigo = cargar_imagen(ruta_completa, cons.ESCALA_ENEMIGOS)
-        lista_temporal.append(imagen_enemigo)
-    
-    animacion_enemigos.append(lista_temporal)
+# --- Cargar animaciones de ENEMIGOS ---
+directorio_enemigos = "assets/images/characters/enemigos"
+# Esta función hace exactamente lo que hacía tu código anterior
+animacion_enemigos = cargar_set_animaciones(directorio_enemigos, cons.ESCALA_ENEMIGOS)
 
 #armas
 imagen_arma = cargar_imagen("assets/images/weapons/vacio.png", cons.ESCALA_ARMA)
@@ -352,6 +370,7 @@ for x in range(cons.TIPOS_TILES):
 posion_roja = cargar_imagen("assets/images/items/posion/posion.png", cons.ESCALA_POSION_ROJA)
 
 
+SCORES_FILE = "scores.csv"   # Archivo donde se guardará
 monedas_imagen = []
 ruta_imagen = "assets/images/items/moneda"
 numero_monedas_imagen = contar_elementos(ruta_imagen)
