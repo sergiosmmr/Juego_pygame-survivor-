@@ -89,45 +89,6 @@ class Personaje():
                 self.forma.top = cons.LIMITES_PANTALLA
             return posicion_pantalla, nivel_completo
 
-    def enemigos(self, jugador, obstaculos_tiles, posicion_pantalla, exit_tile):
-        clipped_line = ()
-        ene_dx = 0
-        ene_dy = 0
-
-        # reposicion de enemigos con el movimiento de pantalla o camara
-        self.forma.x += posicion_pantalla[0]            
-        self.forma.y += posicion_pantalla[1]   
-
-        # crear una linea de vision
-        linea_de_vision = ((self.forma.centerx, self.forma.centery), (jugador.forma.centerx, jugador.forma.centery))
-
-        # chequear si hay obstaculos en la linea de vision de enemigo
-        for obs in obstaculos_tiles:
-            if obs[1].clipline(linea_de_vision):
-                clipped_line = obs[1].clipline(linea_de_vision) 
-
-        # distancia con el jugador
-        distancia =  math.sqrt(((self.forma.centerx - jugador.forma.centerx)**2) + ((self.forma.centery - jugador.forma.centery)**2))
-        if not clipped_line and distancia < cons.RANGO_PERSECUCION:
-                
-            if self.forma.centerx > jugador.forma.centerx:
-                ene_dx = -cons.VELOCIDAD_ENEMIGOS
-            if self.forma.centerx < jugador.forma.centerx:
-                ene_dx = cons.VELOCIDAD_ENEMIGOS
-            if self.forma.centery > jugador.forma.centery:
-                ene_dy = -cons.VELOCIDAD_ENEMIGOS
-            if self.forma.centery < jugador.forma.centery:
-                ene_dy = cons.VELOCIDAD_ENEMIGOS
-            
-
-        self.movimiento(ene_dx, ene_dy, obstaculos_tiles, exit_tile)
-
-        # atacar al jugador
-        if distancia < cons.RANGO_ATAQUE and jugador.golpe == False:
-            jugador.energia -= 10
-            jugador.golpe = True
-            jugador.ultimo_golpe = pg.time.get_ticks()
-
     def update(self): 
         #comprobar si el personaje ha muerto
         if self.energia <= 0:

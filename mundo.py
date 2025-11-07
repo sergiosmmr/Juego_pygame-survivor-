@@ -2,6 +2,7 @@ import pygame as pg
 import constantes_varaibles as cons
 import items as itm
 import personaje as per
+import enemigo as ene
 
 # usar sets para consultas O(1)
 obstaculos = {0, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 35, 40, 41, 42, 43, 44, 45, 50, 51, 52, 53, 54, 55}
@@ -27,13 +28,14 @@ class Mundo():
     def procesar_data(self, data, lista_tile, item_imagenes, animacion_enemigos):
         self.level_lenght = len(data)
 
-        # mapeos para evitar elif repetidos (misma lógica que tenías)
+        # mapeos 
         ITEM_BY_TILE = {
             86: ("moneda", 0),  # (nombre, índice en item_imagenes)
             89: ("posion", 1),
         }
         ENEMIGO_BY_TILE = {
-            90: (0,  80, 2),   # (índice animación, energía, velocidad) sapo
+            #(índice animación, energía, velocidad)
+            90: (0,  80, 2),   #  sapo
             91: (1, 110, 2),   # mosca
             92: (2, 150, 2),   # dragon
         }
@@ -72,7 +74,7 @@ class Mundo():
                 # crear enemigos
                 elif tile in ENEMIGO_BY_TILE:
                     indice_anim, energia, velocidad = ENEMIGO_BY_TILE[tile]
-                    nuevo_enemigo = per.Personaje(image_x, image_y, animacion_enemigos[indice_anim], energia, velocidad)
+                    nuevo_enemigo = ene.Enemigo(image_x, image_y, animacion_enemigos[indice_anim], energia, velocidad)
                     enemigos_append(nuevo_enemigo)
                     tile_data[0] = lista_tile[TILE_TRANSPARENTE]
 

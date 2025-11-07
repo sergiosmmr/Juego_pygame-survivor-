@@ -1,5 +1,4 @@
 import pygame as pg
-import pygame.sprite
 import constantes_varaibles as cons
 
 class Item(pg.sprite.Sprite):

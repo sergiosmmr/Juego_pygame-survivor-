@@ -8,6 +8,7 @@ import items as ts
 import mundo as md
 import csv
 import enemigo as ene
+import utils 
 
 pg.init()
 pg.mixer.init()
@@ -28,66 +29,6 @@ sonido_disparo.set_volume(cons.SONIDO_DISPARO_NORMAL)  # Ajusto el volumen
 
 
 #######################  FUNCIONES  #######################
-
-#  escalar imagen
-def escalar_img(image, scale):
-    w = image.get_width()
-    h = image.get_height()
-    # uso de scale con casteo a int para evitar errores de tipo
-    nueva_imagen = pg.transform.scale(image, (int(w * scale), int(h * scale)))
-    return nueva_imagen
-
-# funcion para contar elementos
-def contar_elementos (directorio):
-    return len (os.listdir(directorio)) 
-
-#funcion listar elementos
-def nombre_carpetas(directorio):
-    return os.listdir(directorio)
-
-# vargar elemneto
-def cargar_imagen(path, escala=None):
-    img = pg.image.load(path).convert_alpha()
-    if escala is not None:
-        img = escalar_img(img, escala)
-    return img
-
-# carga de imagenes de sprites
-def cargar_set_animaciones(directorio_principal, escala):
-    """
-    Carga, ordena y escala múltiples sets de animaciones desde las 
-    subcarpetas de un directorio principal.
-    
-    Devuelve una lista de listas 
-    """
-    lista_principal = []
-    # Lee las subcarpetas 
-    tipo_personajes = nombre_carpetas(directorio_principal) 
-
-    for tipo in tipo_personajes:
-        lista_temporal = []
-        # Crea la ruta a la subcarpeta 
-        ruta_temporal = os.path.join(directorio_principal, tipo)
-        
-        # Nos aseguramos de que sea un directorio antes de leerlo
-        if not os.path.isdir(ruta_temporal):
-            continue
-
-        # Lee los frames 
-        nombres_de_archivos = nombre_carpetas(ruta_temporal)
-        nombres_de_archivos.sort() # Ordena los frames
-
-        for nombre_archivo in nombres_de_archivos:
-            # Crea la ruta completa al archivo
-            ruta_completa = os.path.join(ruta_temporal, nombre_archivo)
-            # Carga la imagen 
-            imagen = cargar_imagen(ruta_completa, escala)
-            lista_temporal.append(imagen)
-        
-        # Añade la lista de este personaje a la lista principal
-        lista_principal.append(lista_temporal)
-        
-    return lista_principal
 
 # pantalla de inicio
 def pantalla_inicio():
@@ -333,15 +274,15 @@ imagen_fondo_derrota = pg.image.load("assets/images/fondos_de_pantalla/imagen_fo
 imagen_fondo_derrota = pg.transform.scale(imagen_fondo_derrota, (cons.ANCHO_VENTANA, cons.ALTO_VENTANA))
 
 # energia
-corazon_vacio = cargar_imagen("assets/images/items/corazon_vacio_1.png", cons.ESCALA_CORAZONES)
-corazon_medio = cargar_imagen("assets/images/items/corazon_mitad_1.png", cons.ESCALA_CORAZONES)
-corazon_lleno = cargar_imagen("assets/images/items/corazon_lleno_1.png", cons.ESCALA_CORAZONES)
+corazon_vacio = utils.cargar_imagen("assets/images/items/corazon_vacio_1.png", cons.ESCALA_CORAZONES)
+corazon_medio = utils.cargar_imagen("assets/images/items/corazon_mitad_1.png", cons.ESCALA_CORAZONES)
+corazon_lleno = utils.cargar_imagen("assets/images/items/corazon_lleno_1.png", cons.ESCALA_CORAZONES)
 
 # --- Cargar animaciones de JUGADORES ---
 directorio_jugadores = "assets/images/characters/players"
 # Esto cargará 'players/necro/...' y si un día agregás 'players/mago/...'
 # también lo cargará automáticamente.
-sets_anim_jugadores = cargar_set_animaciones(directorio_jugadores, cons.ESCALA_PERSONAJE)
+sets_anim_jugadores = utils.cargar_set_animaciones(directorio_jugadores, cons.ESCALA_PERSONAJE)
 
 # Como solo tenés un jugador ('necro'), tus 'animaciones' son el primer (y único) set
 # en la lista que devolvió la función.
@@ -351,13 +292,13 @@ animaciones = sets_anim_jugadores[0]
 # --- Cargar animaciones de ENEMIGOS ---
 directorio_enemigos = "assets/images/characters/enemigos"
 # Esta función hace exactamente lo que hacía tu código anterior
-animacion_enemigos = cargar_set_animaciones(directorio_enemigos, cons.ESCALA_ENEMIGOS)
+animacion_enemigos = utils.cargar_set_animaciones(directorio_enemigos, cons.ESCALA_ENEMIGOS)
 
 #armas
-imagen_arma = cargar_imagen("assets/images/weapons/vacio.png", cons.ESCALA_ARMA)
+imagen_arma = utils.cargar_imagen("assets/images/weapons/vacio.png", cons.ESCALA_ARMA)
 
 #balas
-imagen_bala = cargar_imagen("assets/images/weapons/bullets/fuego_1.png", cons.ESCALA_BALA)
+imagen_bala = utils.cargar_imagen("assets/images/weapons/bullets/fuego_1.png", cons.ESCALA_BALA)
 
 #cargar imagenes del mundo
 lista_tile = []
@@ -367,15 +308,15 @@ for x in range(cons.TIPOS_TILES):
     lista_tile.append(tile_image)
 
 #cargar imagen de los items
-posion_roja = cargar_imagen("assets/images/items/posion/posion.png", cons.ESCALA_POSION_ROJA)
+posion_roja = utils.cargar_imagen("assets/images/items/posion/posion.png", cons.ESCALA_POSION_ROJA)
 
 
 SCORES_FILE = "scores.csv"   # Archivo donde se guardará
 monedas_imagen = []
 ruta_imagen = "assets/images/items/moneda"
-numero_monedas_imagen = contar_elementos(ruta_imagen)
+numero_monedas_imagen = utils.contar_elementos(ruta_imagen)
 for i in range(numero_monedas_imagen):
-    img = cargar_imagen(f"assets/images/items/moneda/moneda_frame_{i+1}.png", cons.ESCALA_MONEDA)
+    img = utils.cargar_imagen(f"assets/images/items/moneda/moneda_frame_{i+1}.png", cons.ESCALA_MONEDA)
     monedas_imagen.append(img)
 
 item_imagenes = [monedas_imagen, [posion_roja]]
@@ -418,19 +359,10 @@ def aplicar_volumen(vol_musica, vol_sonido):
     print(f"Volumen aplicado: Música={vol_musica}, Sonidos={vol_sonido}")
 
 # funciones de nivel / mundo  
-def leer_csv_nivel(nivel):
-    # lee el CSV del nivel y devuelve la matriz world_data
-    data = [[7] * cons.COLUMNAS for _ in range(cons.FILAS)]
-    with open(f"niveles/nivel_{nivel}.csv", newline="") as csv_file:
-        reader = csv.reader(csv_file, delimiter=',')
-        for x, fila in enumerate(reader):
-            for y, columna in enumerate(fila):
-                data[x][y] = int(columna)
-    return data
 
 def cargar_world_y_enemigos(nivel, lista_tile, item_imagenes, animacion_enemigos):
     # crea world + lista_enemigos sin tocar grupos (grupo_items se maneja afuera)
-    world_data_local = leer_csv_nivel(nivel)
+    world_data_local = utils.leer_csv_nivel(nivel)
     world_local = md.Mundo()
     world_local.procesar_data(world_data_local, lista_tile, item_imagenes, animacion_enemigos)
 
@@ -710,7 +642,7 @@ while run:
                     continue  #  no seguir procesando/dibujando este enemigo eliminado
 
                 # update IA / colisiones / etc
-                ene.enemigos(jugador, world.obstaculos_tiles, posicion_pantalla, world.exit_tile)
+                ene.ia(jugador, world.obstaculos_tiles, posicion_pantalla, world.exit_tile)
                 # dibujar sprite
                 ene.dibujar(ventana)
 
