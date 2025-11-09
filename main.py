@@ -9,7 +9,6 @@ import mundo as md
 import csv
 import enemigo as ene
 import utils 
-
 pg.init()
 pg.mixer.init()
 
@@ -19,6 +18,7 @@ pg. display.set_caption(cons.NOMBRE_JUEGO)
 ### variables ####
 posicion_pantalla = [0, 0]
 nivel = 1
+multiplicador_dificultad = 1.0
 
 # === MÚSICA ===
 pg.mixer.music.set_volume(cons.MUSICA_VOLUMEN_NORMAL)  # volumen medio
@@ -60,15 +60,32 @@ def pantalla_menu():
     # 2. Dibujar el título "MENU"
     ventana.blit(texto_titulo_menu, rect_titulo_menu)
 
-    # 3. Dibujar botones del menú
+    # 3. Dibujar botones del menú y centrar el texto
+    
+    # Botón DIFICULTAD
+    pg.draw.rect(ventana, cons.COLOR_BLANCO, boton_dificultad)
+    rect_texto_dif = texto_boton_dificultad.get_rect(center=boton_dificultad.center)
+    ventana.blit(texto_boton_dificultad, rect_texto_dif)
+
+    # Botón RANKING
     pg.draw.rect(ventana, cons.COLOR_BLANCO, boton_ranking)
-    ventana.blit(texto_boton_ranking, (boton_ranking.x + 50, boton_ranking.y + 10))
+    rect_texto_ranking = texto_boton_ranking.get_rect(center=boton_ranking.center)
+    ventana.blit(texto_boton_ranking, rect_texto_ranking)
 
+    # Botón VOLUMEN
     pg.draw.rect(ventana, cons.COLOR_BLANCO, boton_volumen)
-    ventana.blit(texto_boton_volumen, (boton_volumen.x + 50, boton_volumen.y + 10))
+    rect_texto_vol = texto_boton_volumen.get_rect(center=boton_volumen.center)
+    ventana.blit(texto_boton_volumen, rect_texto_vol)
 
-    pg.draw.rect(ventana, cons.COLOR_BLANCO, boton_volver)
-    ventana.blit(texto_boton_volver, (boton_volver.x + 50, boton_volver.y + 10))
+    # Botón CONTROLES
+    pg.draw.rect(ventana, cons.COLOR_BLANCO, boton_controles)
+    rect_texto_controles = texto_boton_controles.get_rect(center=boton_controles.center)
+    ventana.blit(texto_boton_controles, rect_texto_controles)
+
+    # Botón VOLVER (sigue en rojo)
+    pg.draw.rect(ventana, cons.COLOR_ROJO, boton_volver) 
+    rect_texto_volver = texto_boton_volver.get_rect(center=boton_volver.center)
+    ventana.blit(texto_boton_volver, rect_texto_volver)
 
     # 4. Dibujar botones de volumen (SI ESTÁN ACTIVOS)
     if mostrar_opciones_volumen:
@@ -80,6 +97,16 @@ def pantalla_menu():
         ventana.blit(texto_vol_bajo, (boton_vol_bajo.x + 22, boton_vol_bajo.y + 12))
         ventana.blit(texto_vol_norm, (boton_vol_norm.x + 22, boton_vol_norm.y + 12))
         ventana.blit(texto_vol_fuerte, (boton_vol_fuerte.x + 22, boton_vol_fuerte.y + 12))
+
+    if mostrar_opciones_dificultad:
+        pg.draw.rect(ventana, cons.COLOR_AMARILLO, boton_dif_facil)
+        pg.draw.rect(ventana, cons.COLOR_AMARILLO, boton_dif_norm)
+        pg.draw.rect(ventana, cons.COLOR_AMARILLO, boton_dif_fuerte)
+        
+        # (Reutilizamos los textos B, N, F)
+        ventana.blit(texto_vol_bajo, (boton_dif_facil.x + 22, boton_dif_facil.y + 12))
+        ventana.blit(texto_vol_norm, (boton_dif_norm.x + 22, boton_dif_norm.y + 12))
+        ventana.blit(texto_vol_fuerte, (boton_dif_fuerte.x + 22, boton_dif_fuerte.y + 12))
 
     # 5. Actualizar la pantalla
     pg.display.update()
@@ -128,6 +155,55 @@ def pantalla_ranking():
     ventana.blit(texto_boton_volver, (boton_volver.x + 50, boton_volver.y + 10))
 
     # 5. Actualizar la pantalla
+    pg.display.update()
+
+def pantalla_controles():
+    ventana.blit(imagen_fondo_menu, (0, 0)) # Reutiliza fondo
+    ventana.blit(texto_titulo_controles, rect_titulo_controles) # Título
+
+    # Dibujar los textos de ayuda (centrados)
+    rect_texto_1 = texto_controles_1.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA // 2 - 50))
+    rect_texto_2 = texto_controles_2.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA // 2))
+    rect_texto_3 = texto_controles_3.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA // 2 + 50))
+    
+    ventana.blit(texto_controles_1, rect_texto_1)
+    ventana.blit(texto_controles_2, rect_texto_2)
+    ventana.blit(texto_controles_3, rect_texto_3)
+    
+    # Reutiliza el botón VOLVER
+    pg.draw.rect(ventana, cons.COLOR_ROJO, boton_volver)
+    rect_texto_volver = texto_boton_volver.get_rect(center=boton_volver.center)
+    ventana.blit(texto_boton_volver, rect_texto_volver)
+
+    pg.display.update()
+
+def pantalla_briefing():
+    # 1. Dibujar el fondo (reutilizamos el del menú)
+    ventana.blit(imagen_fondo_menu, (0, 0))
+
+    # 2. Dibujar el título "SOBREVIVE"
+    ventana.blit(texto_titulo_briefing, rect_titulo_briefing)
+
+    # 3. Dibujar los textos de la historia (centrados)
+    rect_historia_1 = texto_historia_1.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA // 2 - 150))
+    rect_historia_2 = texto_historia_2.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA // 2 - 110))
+    ventana.blit(texto_historia_1, rect_historia_1)
+    ventana.blit(texto_historia_2, rect_historia_2)
+    
+    # 4. Dibujar los textos de controles (reutilizados)
+    rect_texto_1 = texto_controles_1.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA // 2))
+    rect_texto_2 = texto_controles_2.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA // 2 + 40))
+    rect_texto_3 = texto_controles_3.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA // 2 + 80))
+    ventana.blit(texto_controles_1, rect_texto_1)
+    ventana.blit(texto_controles_2, rect_texto_2)
+    ventana.blit(texto_controles_3, rect_texto_3)
+    
+    # 5. Dibujar el botón "COMENZAR"
+    pg.draw.rect(ventana, cons.COLOR_AMARILLO, boton_comenzar)
+    rect_texto_comenzar = texto_boton_comenzar.get_rect(center=boton_comenzar.center)
+    ventana.blit(texto_boton_comenzar, rect_texto_comenzar)
+
+    # 6. Actualizar la pantalla
     pg.display.update()
 
 
@@ -224,13 +300,20 @@ texto_boton_salir = font_inicio.render("SALIR", True, cons.COLOR_BLANCO)# cambia
 texto_titulo_menu = font_titulo.render("MENU", True, cons.COLOR_BLANCO)
 rect_titulo_menu = texto_titulo_menu.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA/2 - 150))
 
-# 2. Botones del Menú (4 botones)
-boton_ranking = pg.Rect(cons.ANCHO_VENTANA/2 - 100, cons.ALTO_VENTANA / 2 + 45, 200, 50)
-boton_volumen = pg.Rect(cons.ANCHO_VENTANA/2 - 100, cons.ALTO_VENTANA / 2 + 105, 200, 50)
-boton_volver = pg.Rect(cons.ANCHO_VENTANA/2 - 100, cons.ALTO_VENTANA / 2 + 165, 200, 50)
+# 2. Botones del Menú (Ahora 5 botones)
+y_base_menu = cons.ALTO_VENTANA / 2 - 60 # Empezamos un poco más arriba
+espacio_menu = 60 # 50px de botón + 10px de espacio
 
+boton_dificultad = pg.Rect(cons.ANCHO_VENTANA/2 - 100, y_base_menu, 200, 50)
+boton_ranking = pg.Rect(cons.ANCHO_VENTANA/2 - 100, y_base_menu + espacio_menu, 200, 50)
+boton_volumen = pg.Rect(cons.ANCHO_VENTANA/2 - 100, y_base_menu + (espacio_menu * 2), 200, 50)
+boton_controles = pg.Rect(cons.ANCHO_VENTANA/2 - 100, y_base_menu + (espacio_menu * 3), 200, 50) 
+boton_volver = pg.Rect(cons.ANCHO_VENTANA/2 - 100, y_base_menu + (espacio_menu * 4), 200, 50)
+
+texto_boton_dificultad = font_inicio.render("DIFICULTAD", True, cons.COLOR_NEGRO)
 texto_boton_ranking = font_inicio.render("RANKING", True, cons.COLOR_NEGRO)
 texto_boton_volumen = font_inicio.render("VOLUMEN", True, cons.COLOR_NEGRO)
+texto_boton_controles = font_inicio.render("CONTROLES", True, cons.COLOR_NEGRO) 
 texto_boton_volver = font_inicio.render("VOLVER", True, cons.COLOR_NEGRO)
 
 # --- Variables de los Botones de VOLUMEN ---
@@ -242,7 +325,24 @@ boton_vol_bajo = pg.Rect(cons.ANCHO_VENTANA/2 + 110, cons.ALTO_VENTANA/ 2 + 105,
 boton_vol_norm = pg.Rect(cons.ANCHO_VENTANA/2 + 110 + ancho_boton_vol + espacio_boton_vol, cons.ALTO_VENTANA/ 2 + 105, ancho_boton_vol, 50)
 boton_vol_fuerte = pg.Rect(cons.ANCHO_VENTANA/2 + 110 + (ancho_boton_vol + espacio_boton_vol) * 2, cons.ALTO_VENTANA/ 2 + 105, ancho_boton_vol, 50)
 
-# ... (después de las variables de los botones de VOLUMEN) ...
+# Textos (usamos una fuente más pequeña)
+font_volumen = pg.font.Font("assets/font/Colorfiction - Gothic - Regular.otf", 20)
+texto_vol_bajo = font_volumen.render("B", True, cons.COLOR_NEGRO)
+texto_vol_norm = font_volumen.render("N", True, cons.COLOR_NEGRO)
+texto_vol_fuerte = font_volumen.render("F", True, cons.COLOR_NEGRO)
+
+
+# --- Variables de los Botones de DIFICULTAD ---
+# (Se dibujarán condicionalmente, alineados con 'boton_ranking')
+x_inicio_dif = cons.ANCHO_VENTANA/2 + 110 # A la derecha
+y_boton_dif = boton_ranking.y # Alineados con "RANKING"
+
+boton_dif_facil = pg.Rect(x_inicio_dif, y_boton_dif, ancho_boton_vol, 50)
+boton_dif_norm = pg.Rect(x_inicio_dif + ancho_boton_vol + espacio_boton_vol, y_boton_dif, ancho_boton_vol, 50)
+boton_dif_fuerte = pg.Rect(x_inicio_dif + (ancho_boton_vol + espacio_boton_vol) * 2, y_boton_dif, ancho_boton_vol, 50)
+
+# (Reutilizamos la fuente 'font_volumen' y los textos 'B', 'N', 'F'
+#  ya que son idénticos en tamaño y estilo)
 
 # --- Variables de la Pantalla de RANKING ---
 texto_titulo_ranking = font_titulo.render("RANKING", True, cons.COLOR_BLANCO)
@@ -250,12 +350,30 @@ rect_titulo_ranking = texto_titulo_ranking.get_rect(center=(cons.ANCHO_VENTANA /
 # (Reutilizaremos 'boton_volver' y 'texto_boton_volver' del menú)
 # (Usaremos 'font_reinicio' para los puntajes, que ya está cargada)
 
-# Textos (usamos una fuente más pequeña)
-font_volumen = pg.font.Font("assets/font/Colorfiction - Gothic - Regular.otf", 20)
-texto_vol_bajo = font_volumen.render("B", True, cons.COLOR_NEGRO)
-texto_vol_norm = font_volumen.render("N", True, cons.COLOR_NEGRO)
-texto_vol_fuerte = font_volumen.render("F", True, cons.COLOR_NEGRO)
-# -------------------------------------------------
+# ---------- variables controles ------------------------
+# (Usaremos la fuente 'font_titulo' para el título)
+texto_titulo_controles = font_titulo.render("CONTROLES", True, cons.COLOR_BLANCO)
+rect_titulo_controles = texto_titulo_controles.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA/2 - 200))
+
+# (Usaremos 'font_reinicio' para el texto de los controles)
+texto_controles_1 = font_reinicio.render("W, A, S, D = Moverse", True, cons.COLOR_BLANCO)
+texto_controles_2 = font_reinicio.render("Click Izquierdo = Disparar", True, cons.COLOR_BLANCO)
+texto_controles_3 = font_reinicio.render("E = Abrir Puertas", True, cons.COLOR_BLANCO)
+# --------------------------------------------------------
+
+# --- Variables de la Pantalla de BRIEFING (Historia) ---
+# (Usaremos la fuente 'font_titulo' para el título)
+texto_titulo_briefing = font_titulo.render("SOBREVIVE", True, cons.COLOR_BLANCO)
+rect_titulo_briefing = texto_titulo_briefing.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA/2 - 250))
+
+# (Usaremos 'font_reinicio' para el texto)
+texto_historia_1 = font_reinicio.render("Hordas de monstruos han invadido.", True, cons.COLOR_BLANCO)
+texto_historia_2 = font_reinicio.render("¡Elimínalos a todos y encuentra la salida!", True, cons.COLOR_AMARILLO)
+
+# Botón para empezar
+boton_comenzar = pg.Rect(cons.ANCHO_VENTANA/2 - 100, cons.ALTO_VENTANA / 2 + 250, 200, 50)
+texto_boton_comenzar = font_inicio.render("COMENZAR", True, cons.COLOR_NEGRO)
+# --------------------------------------------------------
 
 ##############importar imagenes#############
 
@@ -360,11 +478,13 @@ def aplicar_volumen(vol_musica, vol_sonido):
 
 # funciones de nivel / mundo  
 
-def cargar_world_y_enemigos(nivel, lista_tile, item_imagenes, animacion_enemigos):
+def cargar_world_y_enemigos(nivel, lista_tile, item_imagenes, animacion_enemigos, multiplicador):
     # crea world + lista_enemigos sin tocar grupos (grupo_items se maneja afuera)
-    world_data_local = utils.leer_csv_nivel(nivel)
+    world_data_local = utils.leer_csv_nivel(nivel) 
     world_local = md.Mundo()
-    world_local.procesar_data(world_data_local, lista_tile, item_imagenes, animacion_enemigos)
+    # Pasa el multiplicador a la siguiente función
+    world_local.procesar_data(world_data_local, lista_tile, item_imagenes, animacion_enemigos, multiplicador)
+    # ... (resto de la función) ...
 
     lista_enemigos_local = []
     for ene in world_local.lista_enemigo:
@@ -398,6 +518,41 @@ def cargar_scores():
     # Devuelve solo los 5 mejores puntajes
     return scores_list[:5]
 
+# ... (después del final de 'cargar_scores()') ...
+
+def iniciar_juego(nivel_a_cargar):
+    """
+    Prepara todas las variables y carga los assets para iniciar el juego.
+    """
+    global mostrar_inicio, mostrar_menu, mostrar_ranking, mostrar_selec_dificultad, evitar_click_fantasma
+    global world, lista_enemigos, jugador # Hacemos globales las variables del juego
+    
+    # 1. Configura la música y los estados
+    pg.mixer.music.load(cons.MUSICA_JUEGO)
+    pg.mixer.music.play(-1)
+    mostrar_inicio = False
+    mostrar_menu = False
+    mostrar_ranking = False
+    evitar_click_fantasma = True # Activa el anti-click
+    
+    # 2. Resetea al jugador
+    jugador.energia = 100
+    jugador.vivo = True
+    jugador.score = 0
+    
+    # 3. Limpia los grupos de sprites
+    grupo_damage_text.empty()
+    grupo_balas.empty()
+    grupo_items.empty()
+    
+    # 4. Carga el mundo (¡PASANDO EL MULTIPLICADOR!)
+    world, lista_enemigos = cargar_world_y_enemigos(nivel_a_cargar, lista_tile, item_imagenes, animacion_enemigos, multiplicador_dificultad)
+    
+    # 5. Coloca al jugador y los items
+    jugador.actualizar_coordenadas(cons.COORDENADAS_ENEMIGO_NIVEL[str(nivel_a_cargar)])
+    for item in world.lista_item:
+        grupo_items.add(item)
+
 
 world_data = []
 
@@ -412,7 +567,7 @@ with open("niveles/nivel_1.csv", newline="") as csv_file:
         for y, columna in enumerate(fila):
             world_data [x] [y] = int(columna)
 world = md.Mundo()
-world.procesar_data(world_data, lista_tile, item_imagenes, animacion_enemigos) 
+world.procesar_data(world_data, lista_tile, item_imagenes, animacion_enemigos, multiplicador_dificultad) 
 
 #crear un jugador de la clase personaje en posicion x , y
 jugador = per.Personaje (80, 80, animaciones, 80, 1)
@@ -451,6 +606,10 @@ mostrar_inicio = True
 mostrar_menu = False
 mostrar_opciones_volumen = False
 mostrar_ranking = False
+mostrar_opciones_dificultad = False
+mostrar_selec_dificultad = False
+mostrar_controles = False
+mostrar_briefing = False
 evitar_click_fantasma = False
 
 # estado de victoria
@@ -500,10 +659,8 @@ while run:
                 run = False
             if event.type == pg.MOUSEBUTTONDOWN:
                 if boton_jugar.collidepoint(event.pos):
-                    pg.mixer.music.load(cons.MUSICA_JUEGO)
-                    pg.mixer.music.play(-1)
                     mostrar_inicio = False
-                    evitar_click_fantasma = True
+                    mostrar_briefing = True 
                 elif boton_menu.collidepoint(event.pos):
                     pg.mixer.music.load(cons.MUSICA_MENU) # Carga la nueva música
                     pg.mixer.music.play(-1) # Reproduce en loop
@@ -527,14 +684,30 @@ while run:
                     mostrar_menu = False
                     mostrar_inicio = True # Vuelve al inicio
                     mostrar_opciones_volumen = False # Oculta el volumen al salir
+                    mostrar_opciones_dificultad = False # oculta dificultad al salir
+                    mostrar_controles = False
                 # Lógica del botón VOLUMEN (mostrar/ocultar)
                 elif boton_volumen.collidepoint(event.pos):
                     mostrar_opciones_volumen = not mostrar_opciones_volumen
+                    mostrar_opciones_dificultad = False # Oculta el otro menú
 
                 # Lógica del botón RANKING (no hace nada)
                 elif boton_ranking.collidepoint(event.pos):
                     mostrar_menu = False
                     mostrar_ranking = True
+                    mostrar_opciones_volumen = False # Oculta menús
+                    mostrar_opciones_dificultad = False
+                
+                # Lógica del botón DIFICULTAD (mostrar/ocultar)
+                elif boton_dificultad.collidepoint(event.pos): 
+                    mostrar_opciones_dificultad = not mostrar_opciones_dificultad
+                    mostrar_opciones_volumen = False # Oculta el otro menú
+
+                elif boton_controles.collidepoint(event.pos):
+                    mostrar_menu = False
+                    mostrar_controles = True # <-- Activa la nueva pantalla
+                    mostrar_opciones_volumen = False
+                    mostrar_opciones_dificultad = False
 
                 # Lógica de los botones B, N, F (si están visibles)
                 elif mostrar_opciones_volumen:
@@ -546,6 +719,20 @@ while run:
 
                     elif boton_vol_fuerte.collidepoint(event.pos):
                         aplicar_volumen(cons.MUSICA_VOLUMEN_FUERTE, cons.SONIDO_DISPARO_FUERTE)
+
+                # Lógica de los botones F, N, D (Dificultad)
+                elif mostrar_opciones_dificultad:
+                    if boton_dif_facil.collidepoint(event.pos):
+                        multiplicador_dificultad = 0.7
+                        print("Dificultad: FÁCIL (0.7)")
+
+                    elif boton_dif_norm.collidepoint(event.pos):
+                        multiplicador_dificultad = 1.0
+                        print("Dificultad: NORMAL (1.0)")
+
+                    elif boton_dif_fuerte.collidepoint(event.pos):
+                        multiplicador_dificultad = 1.5
+                        print("Dificultad: DIFÍCIL (1.5)")
     
     elif mostrar_ranking:
         pantalla_ranking() # Llama a la función de DIBUJO
@@ -559,6 +746,34 @@ while run:
                 if boton_volver.collidepoint(event.pos):
                     mostrar_ranking = False
                     mostrar_menu = True
+
+    elif mostrar_controles:
+        pantalla_controles() # Llama a la función de DIBUJO
+
+        # Bucle de eventos de controles
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                run = False
+            if event.type == pg.MOUSEBUTTONDOWN:
+                # Lógica del botón VOLVER (reutilizado)
+                if boton_volver.collidepoint(event.pos):
+                    mostrar_controles = False
+                    mostrar_menu = True # Vuelve al menú
+    # ----------------------------------------
+
+    elif mostrar_briefing:
+        pantalla_briefing() # Llama a la función de DIBUJO
+
+        # Bucle de eventos del briefing
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                run = False
+            if event.type == pg.MOUSEBUTTONDOWN:
+                # Lógica del botón COMENZAR
+                if boton_comenzar.collidepoint(event.pos):
+                    mostrar_briefing = False
+                    iniciar_juego(nivel) # <-- ¡AHORA SÍ EMPIEZA EL JUEGO!
+    # ----------------------------------------
 
     else:
             
@@ -671,7 +886,7 @@ while run:
                 if nivel < cons.NIVEL_MAXIMO:
                     nivel += 1
                     # cargar mundo y enemigos con función
-                    world, lista_enemigos = cargar_world_y_enemigos(nivel, lista_tile, item_imagenes, animacion_enemigos)
+                    world, lista_enemigos = cargar_world_y_enemigos(nivel, lista_tile, item_imagenes, animacion_enemigos, multiplicador_dificultad)
                     # reposicionar jugador según config
                     jugador.actualizar_coordenadas(cons.COORDENADAS_ENEMIGO_NIVEL[str(nivel)])
                     # refrescar items del mundo (como ya hacías)
@@ -726,109 +941,109 @@ while run:
             ###########################primer dragon no me quita vida, corregir##########################3
         #  BUCLE DE EVENTOS  ---
         for event in pg.event.get():
-            if event.type == pg.QUIT:
-                run = False
+                if event.type == pg.QUIT:
+                    run = False
 
-            # --- LÓGICA DE TECLADO (KEYDOWN) ---
-            if event.type == pg.KEYDOWN:
+                # --- LÓGICA DE TECLADO (KEYDOWN) ---
+                if event.type == pg.KEYDOWN:
 
-                if jugador.vivo:
-                    if event.key == pg.K_w:
-                        mover_arriba = True
-                    elif event.key == pg.K_s:
-                        mover_abajo = True
-                    elif event.key == pg.K_d:
-                        mover_derecha = True
-                    elif event.key == pg.K_a:
-                        mover_izquierda = True
-                    elif event.key == pg.K_e:
-                        if world.cambiar_puerta(jugador, lista_tile):
-                            print("puerta cambiada")
-                else:
-                # --- Eventos de INPUT (solo si está muerto/ganó y el input está activo) ---
-                    if input_activo:
-                        if event.key == pg.K_BACKSPACE:
-                            nombre_jugador = nombre_jugador[:-1]
-                    
-                        elif event.key == pg.K_RETURN:
-                            # Guardar puntaje si tiene 3 letras y no se guardó
-                            if len(nombre_jugador.strip()) == 3 and not puntaje_guardado:
-                                try:
-                                    file_existe = os.path.isfile(SCORES_FILE)
-                                    with open(SCORES_FILE, "a", newline="", encoding="utf-8") as f:
-                                        writer = csv.writer(f)
-                                        if not file_existe:
-                                            writer.writerow(["nombre", "score"]) # Encabezado
-                                        writer.writerow([nombre_jugador.strip().upper(), jugador.score])
-                                    puntaje_guardado = True
-                                except Exception as e:
-                                    print("[ERROR guardando score]", e)
-
-                        # Añadir letra (solo si es alfa, < 3 letras y no guardó)
-                        elif event.unicode.isalpha() and len(nombre_jugador) < 3 and not puntaje_guardado:
-                            nombre_jugador += event.unicode.upper()
-
-            # LÓGICA DE TECLA LEVANTADA (KEYUP) 
-            if event.type == pg.KEYUP:
-                if event.key == pg.K_w:
-                    mover_arriba = False
-                elif event.key == pg.K_s:
-                    mover_abajo = False
-                elif event.key == pg.K_d:
-                    mover_derecha = False
-                elif event.key == pg.K_a:
-                    mover_izquierda = False
-
-            # LÓGICA DE CLICKS (MOUSEBUTTONDOWN) 
-            if event.type == pg.MOUSEBUTTONDOWN:
-                if not jugador.vivo:
-                    if puntaje_guardado:
-                        # 1. Click en el botón REINICIAR
-                        if boton_reinicio.collidepoint(event.pos):
-                            # resetear estado del jugador
-                            jugador.vivo = True
-                            jugador.energia = 100
-                            jugador.score = 0
-                            nivel = 1
-                        
-
-                            # --- AÑADIDO: Resetear variables de input ---
-                            input_activo = False
-                            nombre_jugador = ""
-                            puntaje_guardado = False
-                            t_fin_juego = 0
-                            mensaje_fin_juego = "GAME OVER" # Resetea el título
-                            font_fin_juego = font_game_over # Resetea la fuente
-                            
-                            # Limpiar grupos
-                            grupo_damage_text.empty()
-                            grupo_balas.empty()
-                            grupo_items.empty()
-
-                            # recargar mundo y enemigos
-                            world, lista_enemigos = cargar_world_y_enemigos(nivel, lista_tile, item_imagenes, animacion_enemigos)
-                            # reposicionar jugador
-                            jugador.actualizar_coordenadas(cons.COORDENADAS_ENEMIGO_NIVEL[str(nivel)])
-                            # agregar items
-                            for item in world.lista_item:
-                                grupo_items.add(item)
-                            
-                            # Reiniciar música
-                            pg.mixer.music.load(cons.MUSICA_JUEGO)
-                            pg.mixer.music.play(-1)
-                        # 1b. Click en el botón SALIR (Final)
-                        elif boton_salir_final.collidepoint(event.pos):
-                            run = False
+                    if jugador.vivo:
+                        if event.key == pg.K_w:
+                            mover_arriba = True
+                        elif event.key == pg.K_s:
+                            mover_abajo = True
+                        elif event.key == pg.K_d:
+                            mover_derecha = True
+                        elif event.key == pg.K_a:
+                            mover_izquierda = True
+                        elif event.key == pg.K_e:
+                            if world.cambiar_puerta(jugador, lista_tile):
+                                print("puerta cambiada")
                     else:
-
-                        # 2. Click en la CAJA de input
-                        if input_rect.collidepoint(event.pos):
-                            if pg.time.get_ticks() - t_fin_juego > 1000: # Solo activa si pasó el delay
-                                input_activo = True
+                    # --- Eventos de INPUT (solo si está muerto/ganó y el input está activo) ---
+                        if input_activo:
+                            if event.key == pg.K_BACKSPACE:
+                                nombre_jugador = nombre_jugador[:-1]
                         
-                        # 3. Click FUERA de la caja
+                            elif event.key == pg.K_RETURN:
+                                # Guardar puntaje si tiene 3 letras y no se guardó
+                                if len(nombre_jugador.strip()) == 3 and not puntaje_guardado:
+                                    try:
+                                        file_existe = os.path.isfile(SCORES_FILE)
+                                        with open(SCORES_FILE, "a", newline="", encoding="utf-8") as f:
+                                            writer = csv.writer(f)
+                                            if not file_existe:
+                                                writer.writerow(["nombre", "score"]) # Encabezado
+                                            writer.writerow([nombre_jugador.strip().upper(), jugador.score])
+                                        puntaje_guardado = True
+                                    except Exception as e:
+                                        print("[ERROR guardando score]", e)
+
+                            # Añadir letra (solo si es alfa, < 3 letras y no guardó)
+                            elif event.unicode.isalpha() and len(nombre_jugador) < 3 and not puntaje_guardado:
+                                nombre_jugador += event.unicode.upper()
+
+                # LÓGICA DE TECLA LEVANTADA (KEYUP) 
+                if event.type == pg.KEYUP:
+                    if event.key == pg.K_w:
+                        mover_arriba = False
+                    elif event.key == pg.K_s:
+                        mover_abajo = False
+                    elif event.key == pg.K_d:
+                        mover_derecha = False
+                    elif event.key == pg.K_a:
+                        mover_izquierda = False
+
+                # LÓGICA DE CLICKS (MOUSEBUTTONDOWN) 
+                if event.type == pg.MOUSEBUTTONDOWN:
+                    if not jugador.vivo:
+                        if puntaje_guardado:
+                            # 1. Click en el botón REINICIAR
+                            if boton_reinicio.collidepoint(event.pos):
+                                # resetear estado del jugador
+                                jugador.vivo = True
+                                jugador.energia = 100
+                                jugador.score = 0
+                                nivel = 1
+                            
+
+                                # --- AÑADIDO: Resetear variables de input ---
+                                input_activo = False
+                                nombre_jugador = ""
+                                puntaje_guardado = False
+                                t_fin_juego = 0
+                                mensaje_fin_juego = "GAME OVER" # Resetea el título
+                                font_fin_juego = font_game_over # Resetea la fuente
+                                
+                                # Limpiar grupos
+                                grupo_damage_text.empty()
+                                grupo_balas.empty()
+                                grupo_items.empty()
+
+                                # recargar mundo y enemigos
+                                world, lista_enemigos = cargar_world_y_enemigos(nivel, lista_tile, item_imagenes, animacion_enemigos)
+                                # reposicionar jugador
+                                jugador.actualizar_coordenadas(cons.COORDENADAS_ENEMIGO_NIVEL[str(nivel)])
+                                # agregar items
+                                for item in world.lista_item:
+                                    grupo_items.add(item)
+                                
+                                # Reiniciar música
+                                pg.mixer.music.load(cons.MUSICA_JUEGO)
+                                pg.mixer.music.play(-1)
+                            # 1b. Click en el botón SALIR (Final)
+                            elif boton_salir_final.collidepoint(event.pos):
+                                run = False
                         else:
-                            input_activo = False
+
+                            # 2. Click en la CAJA de input
+                            if input_rect.collidepoint(event.pos):
+                                if pg.time.get_ticks() - t_fin_juego > 1000: # Solo activa si pasó el delay
+                                    input_activo = True
+                            
+                            # 3. Click FUERA de la caja
+                            else:
+                                input_activo = False
 
 
         pg.display.update()

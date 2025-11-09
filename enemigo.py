@@ -6,28 +6,40 @@ class Enemigo(pg.sprite.Sprite):
     """
     Representa un enemigo en el juego.
     """
-    def __init__(self, x, y, animaciones, energia, velocidad):
+    def __init__(self, x, y, animaciones, base_energia, base_velocidad, base_dano, tipo_ia, multiplicador):
         pg.sprite.Sprite.__init__(self) # Inicializa la clase Sprite
         
-        self.velocidad = velocidad
-        self.energia = energia
+        # --- Stats (AQUÍ CALCULAMOS LA DIFICULTAD) ---
+        self.energia = int(base_energia * multiplicador)
         self.vivo = True
+        self.velocidad = base_velocidad * multiplicador
+        self.dano = int(base_dano * multiplicador)
+        self.tipo_ia = tipo_ia
+        
+        # --- Animación ---
         self.flip = False
         self.animaciones = animaciones
-        self.frame_index = 0 # Es más seguro empezar en 0 que en 1
+        self.frame_index = 0
         self.update_time = pg.time.get_ticks()
         self.image = self.animaciones[self.frame_index]
-        
-        # Crear rectángulos
+        self.cooldown_animacion = 100
+
+        # --- Rectángulos ---
         self.forma = self.image.get_rect()
         self.forma.center = (x, y)
         
-        # Variables de animación (copiadas de tu Personaje)
-        self.cooldown_animacion = 100
-
-        # Variables de IA y ataque
+        # --- Variables de IA y Ataque ---
         self.ultimo_ataque = 0
-        self.cooldown_ataque = 1000 # El 'golpe_cooldown' del jugador
+        self.cooldown_ataque = 1000 
+        
+        # --- Variables solo para "patrulla" ---
+        self.contador_movimiento = 0
+        self.direccion_patrulla = 1 # 1 = derecha, -1 = izquierda
+        # --- AÑADE ESTO (SOLO PARA DEBUG) ---
+        print(f"--- ENEMIGO CREADO (Tipo: {self.tipo_ia}) ---")
+        print(f"  - Multiplicador de Dificultad: {multiplicador}")
+        print(f"  - STATS FINALES: Energía={self.energia}, Velocidad={self.velocidad}, Daño={self.dano}")
+        print("-------------------------------------------------")
 
     def update(self): 
         """

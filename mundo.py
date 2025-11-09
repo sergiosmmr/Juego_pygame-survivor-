@@ -25,7 +25,9 @@ class Mundo():
         self.lista_enemigo = []
         self.puertas_cerradas_tiles = []
 
-    def procesar_data(self, data, lista_tile, item_imagenes, animacion_enemigos):
+    # Reemplazá tu función 'procesar_data' por esta:
+    
+    def procesar_data(self, data, lista_tile, item_imagenes, animacion_enemigos, multiplicador): # Acepta multiplicador
         self.level_lenght = len(data)
 
         # mapeos 
@@ -33,13 +35,24 @@ class Mundo():
             86: ("moneda", 0),  # (nombre, índice en item_imagenes)
             89: ("posion", 1),
         }
+        
+        # ---  Diccionario con DAÑO y TIPO_IA ---
         ENEMIGO_BY_TILE = {
-            #(índice animación, energía, velocidad)
-            90: (0,  80, 2),   #  sapo
-            91: (1, 110, 2),   # mosca
-            92: (2, 150, 2),   # dragon
+            # tile: (anim_idx, base_energia, base_velocidad, base_dano, tipo_ia)
+            90: (0, 100, 1, 5, "patrulla"),     # rana (patrulla)
+            91: (1, 110, 1, 8, "patrulla"),     # cuervo (patrulla)
+            93: (3, 120, 1, 10, "persecucion"), # alien volando (persigue)
+            94: (4, 120, 2, 12, "patrulla"),    # muerte caminando (patrulla)
+            95: (5, 130, 2, 10, "persecucion"), # sapo (persigue)
+            96: (6, 150, 2, 15, "persecucion"), # slime (persigue)
+            97: (7, 150, 3, 18, "persecucion"), # caballo (persigue)
+            98: (8, 180, 3, 20, "demonio"),     # demonio (persigue)
+            99: (9, 200, 3, 25, "mago")         # mago (persigue)
         }
-        TILE_TRANSPARENTE = 22  # tile “vacío” que usás para limpiar donde había un objeto/enemigo
+        # (¡Podés cambiar "patrulla" por "persecucion" o los valores de daño como quieras!)
+        # -----------------------------------------------------------------
+        
+        TILE_TRANSPARENTE = 22  # tile “vacío”
 
         tile_size = cons.TAMANIO_TILES
         obst_append = self.obstaculos_tiles.append
@@ -71,12 +84,23 @@ class Mundo():
                     items_append(nuevo_item)
                     tile_data[0] = lista_tile[TILE_TRANSPARENTE]
 
-                # crear enemigos
+                # --- CAMBIO 3: Lógica de creación de enemigos actualizada ---
                 elif tile in ENEMIGO_BY_TILE:
-                    indice_anim, energia, velocidad = ENEMIGO_BY_TILE[tile]
-                    nuevo_enemigo = ene.Enemigo(image_x, image_y, animacion_enemigos[indice_anim], energia, velocidad)
+                    # 1. Leemos los 5 valores "base" del diccionario
+                    indice_anim, base_energia, base_velocidad, base_dano, tipo_ia = ENEMIGO_BY_TILE[tile]
+                    
+                    # 2. Pasamos esos 5 valores + el multiplicador al crear el enemigo
+                    nuevo_enemigo = ene.Enemigo(image_x, image_y, 
+                                                animacion_enemigos[indice_anim], 
+                                                base_energia, 
+                                                base_velocidad, 
+                                                base_dano, 
+                                                tipo_ia, 
+                                                multiplicador) # Aquí se aplica la dificultad!
+                                                
                     enemigos_append(nuevo_enemigo)
                     tile_data[0] = lista_tile[TILE_TRANSPARENTE]
+                # ------------------------------------------------------------
 
                 # guardar el tile en el mapa
                 mapa_append(tile_data)
