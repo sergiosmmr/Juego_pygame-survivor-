@@ -63,3 +63,8 @@ NIVEL_MAXIMO = 3
 POSICION_TEXTO_SCORE_X = 1050
 POSICION_TEXTO_SCORE_Y = 5 
 
+
+################### FUENTES  #################
+FUENTE_GOTHIC = "assets/font/Colorfiction - Gothic - Regular.otf" # PARA EL TITULO
+FUENTE_TEXTO = "assets/font/Ryga.ttf"
+

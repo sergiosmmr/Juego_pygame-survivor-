@@ -31,28 +31,75 @@ def cargar_set_animaciones(directorio_principal, escala):
     """
     Carga, ordena y escala múltiples sets de animaciones desde las 
     subcarpetas de un directorio principal.
+    
+    Busca carpetas de personajes y DENTRO
+    busca carpetas de acción ("idle", "run").
+    
+    Devuelve una lista de DICCIONARIOS 
     """
-    lista_principal = []
-    tipo_personajes = nombre_carpetas(directorio_principal) 
+    lista_principal_de_personajes = []
+    
+    # 1. Lee las carpetas de personajes 
+    try:
+        tipo_personajes = nombre_carpetas(directorio_principal) 
+        tipo_personajes.sort()
+    except FileNotFoundError:
+        print(f"Error: No se encontró el directorio de personajes: {directorio_principal}")
+        return []
 
     for tipo in tipo_personajes:
-        lista_temporal = []
-        ruta_temporal = os.path.join(directorio_principal, tipo)
+        # Crea la ruta al personaje 
+        ruta_personaje = os.path.join(directorio_principal, tipo)
         
-        if not os.path.isdir(ruta_temporal):
+        if not os.path.isdir(ruta_personaje):
             continue
 
-        nombres_de_archivos = nombre_carpetas(ruta_temporal)
-        nombres_de_archivos.sort() # Ordena los frames
+        # Diccionario para las animaciones de ESTE personaje
+        animaciones_del_personaje = {}
+        
+        # 2. Lee las carpetas de acción ("idle", "run")
+        try:
+            tipo_acciones = nombre_carpetas(ruta_personaje)
+        except FileNotFoundError:
+            continue # Salta este personaje si su carpeta está vacía
 
-        for nombre_archivo in nombres_de_archivos:
-            ruta_completa = os.path.join(ruta_temporal, nombre_archivo)
-            imagen = cargar_imagen(ruta_completa, escala)
-            lista_temporal.append(imagen)
+        for accion in tipo_acciones:
+            lista_temporal_frames = []
+            # Crea la ruta a la acción
+            ruta_accion = os.path.join(ruta_personaje, accion)
+            
+            if not os.path.isdir(ruta_accion):
+                continue
+            
+            # 3. Lee los frames 
+            try:
+                nombres_de_archivos = nombre_carpetas(ruta_accion)
+                nombres_de_archivos.sort() # Ordena los frames
+            except FileNotFoundError:
+                continue
+
+            for nombre_archivo in nombres_de_archivos:
+                ruta_completa = os.path.join(ruta_accion, nombre_archivo)
+                imagen = cargar_imagen(ruta_completa, escala)
+                lista_temporal_frames.append(imagen)
+            
+            # Guarda la lista de frames en el diccionario
+            # ej. animaciones_del_personaje["idle"] = [<img1>, <img2>]
+            if lista_temporal_frames: # Solo si se cargaron imágenes
+                animaciones_del_personaje[accion] = lista_temporal_frames
         
-        lista_principal.append(lista_temporal)
+        # 4. === EL ARREGLO PARA EL PERSONAJE SI NO TIENE IDLE ===
+        # Si el personaje (dragon) no tiene "idle" PERO sí tiene "run"...
+        if "idle" not in animaciones_del_personaje and "run" in animaciones_del_personaje:
+            # ...crea una animación "idle" usando el primer frame de "run"
+            print(f"Aviso: El personaje '{tipo}' no tiene anim. 'idle'. Usando el primer frame de 'run'.")
+            animaciones_del_personaje["idle"] = [ animaciones_del_personaje["run"][0] ]
         
-    return lista_principal
+        # 5. Añade el diccionario de este personaje a la lista principal
+        if animaciones_del_personaje: # Solo si cargó algo
+            lista_principal_de_personajes.append(animaciones_del_personaje)
+            
+    return lista_principal_de_personajes
 
 def leer_csv_nivel(nivel):
     """ Lee un archivo CSV de nivel y devuelve una matriz (lista de listas). """
