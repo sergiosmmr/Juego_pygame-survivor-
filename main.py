@@ -42,15 +42,21 @@ def pantalla_inicio():
 
     #  centrada
     x_centrada = (cons.ANCHO_VENTANA // 2) - (ancho_texto // 2)
-    
     # Dibujamos el texto en la x centrada
     ventana.blit(texto_surface, (x_centrada, cons.ALTO_VENTANA/2 - 200))
+
     pg.draw.rect(ventana, cons.COLOR_AMARILLO, boton_jugar)
+    rect_texto_jugar = texto_boton_jugar.get_rect(center=boton_jugar.center)
+    ventana.blit(texto_boton_jugar, rect_texto_jugar)
+
     pg.draw.rect(ventana, cons.COLOR_ROJO, boton_salir)
+    rect_texto_salir = texto_boton_salir.get_rect(center=boton_salir.center)
+    ventana.blit(texto_boton_salir, rect_texto_salir)
+
     pg.draw.rect(ventana, cons.COLOR_BLANCO, boton_menu)
-    ventana.blit(texto_boton_jugar, (boton_jugar.x + 50, boton_jugar.y + 10))
-    ventana.blit(texto_boton_salir, (boton_salir.x + 50, boton_salir.y + 10))
-    ventana.blit(texto_boton_menu, (boton_menu.x + 50, boton_menu.y + 10))
+    rect_texto_menu = texto_boton_menu.get_rect(center=boton_menu.center)
+    ventana.blit(texto_boton_menu, rect_texto_menu
+                 )
     pg.display.update()
 
 def pantalla_menu():
@@ -94,19 +100,29 @@ def pantalla_menu():
         pg.draw.rect(ventana, cons.COLOR_AMARILLO, boton_vol_fuerte)
 
         # Centrar texto "B", "N", "F"
-        ventana.blit(texto_vol_bajo, (boton_vol_bajo.x + 22, boton_vol_bajo.y + 12))
-        ventana.blit(texto_vol_norm, (boton_vol_norm.x + 22, boton_vol_norm.y + 12))
-        ventana.blit(texto_vol_fuerte, (boton_vol_fuerte.x + 22, boton_vol_fuerte.y + 12))
+        rect_vol_b = texto_vol_bajo.get_rect(center=boton_vol_bajo.center)
+        ventana.blit(texto_vol_bajo, rect_vol_b)
+        
+        rect_vol_n = texto_vol_norm.get_rect(center=boton_vol_norm.center)
+        ventana.blit(texto_vol_norm, rect_vol_n)
+        
+        rect_vol_f = texto_vol_fuerte.get_rect(center=boton_vol_fuerte.center)
+        ventana.blit(texto_vol_fuerte, rect_vol_f)
 
     if mostrar_opciones_dificultad:
         pg.draw.rect(ventana, cons.COLOR_AMARILLO, boton_dif_facil)
         pg.draw.rect(ventana, cons.COLOR_AMARILLO, boton_dif_norm)
         pg.draw.rect(ventana, cons.COLOR_AMARILLO, boton_dif_fuerte)
         
-        # (Reutilizamos los textos B, N, F)
-        ventana.blit(texto_vol_bajo, (boton_dif_facil.x + 22, boton_dif_facil.y + 12))
-        ventana.blit(texto_vol_norm, (boton_dif_norm.x + 22, boton_dif_norm.y + 12))
-        ventana.blit(texto_vol_fuerte, (boton_dif_fuerte.x + 22, boton_dif_fuerte.y + 12))
+        # usamos los textos "Facil", "Normal", "Dificl"
+        rect_dif_f = texto_dif_facil.get_rect(center=boton_dif_facil.center)
+        ventana.blit(texto_dif_facil, rect_dif_f)
+        
+        rect_dif_n = texto_dif_norm.get_rect(center=boton_dif_norm.center)
+        ventana.blit(texto_dif_norm, rect_dif_n)
+        
+        rect_dif_fu = texto_dif_fuerte.get_rect(center=boton_dif_fuerte.center)
+        ventana.blit(texto_dif_fuerte, rect_dif_fu)
 
     # 5. Actualizar la pantalla
     pg.display.update()
@@ -152,7 +168,8 @@ def pantalla_ranking():
 
     # 4. Dibujar el botón "VOLVER" (Reutilizado del menú)
     pg.draw.rect(ventana, cons.COLOR_BLANCO, boton_volver)
-    ventana.blit(texto_boton_volver, (boton_volver.x + 50, boton_volver.y + 10))
+    rect_texto_volver = texto_boton_volver.get_rect(center=boton_volver.center)
+    ventana.blit(texto_boton_volver, rect_texto_volver)
 
     # 5. Actualizar la pantalla
     pg.display.update()
@@ -386,9 +403,14 @@ boton_vol_bajo = pg.Rect(x_inicio_vol, y_boton_vol, ancho_boton_vol, 50)
 boton_vol_norm = pg.Rect(x_inicio_vol + ancho_boton_vol + espacio_boton_vol, y_boton_vol, ancho_boton_vol, 50)
 boton_vol_fuerte = pg.Rect(x_inicio_vol + (ancho_boton_vol + espacio_boton_vol) * 2, y_boton_vol, ancho_boton_vol, 50)
 
-texto_vol_bajo = font_volumen.render("MIN", True, cons.COLOR_NEGRO)
-texto_vol_norm = font_volumen.render("NOR", True, cons.COLOR_NEGRO)
-texto_vol_fuerte = font_volumen.render("MAX", True, cons.COLOR_NEGRO)
+texto_vol_bajo = font_volumen.render("M I N", True, cons.COLOR_NEGRO)
+texto_vol_norm = font_volumen.render("N O R", True, cons.COLOR_NEGRO)
+texto_vol_fuerte = font_volumen.render("M A X", True, cons.COLOR_NEGRO)
+
+# (Reutilizamos la fuente 'font_volumen')
+texto_dif_facil = font_volumen.render("Facil", True, cons.COLOR_NEGRO)
+texto_dif_norm = font_volumen.render("Normal", True, cons.COLOR_NEGRO)
+texto_dif_fuerte = font_volumen.render("Dificil", True, cons.COLOR_NEGRO)
 
 # Textos de Ranking
 texto_titulo_ranking = font_titulo.render("RANKING", True, cons.COLOR_BLANCO)
