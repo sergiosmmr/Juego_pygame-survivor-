@@ -39,7 +39,7 @@ class Personaje():
         #logica de golpe
         self.golpe = False
         self.ultimo_golpe = pg.time.get_ticks()
-        self.golpe_cooldown = 1000 
+        self.golpe_cooldown = 500
 
     def actualizar_coordenadas (self, tupla):
         self.forma.center = (tupla[0], tupla[1])
@@ -137,9 +137,9 @@ class Personaje():
             self.frame_index += 1 # avanza el frame
             self.update_time = pg.time.get_ticks()
 
-            # si se paso del final, vuelve al principio
-            if self.frame_index >= len(self.animaciones):
-                self.frame_index = 0
+        # si se paso del final, vuelve al principio
+        if self.frame_index >= len(self.accion_actual):
+            self.frame_index = 0
 
         # asigna la imagen correcta del frame actual
         self.image = self.accion_actual[self.frame_index]

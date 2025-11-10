@@ -44,8 +44,9 @@ class Enemigo(pg.sprite.Sprite):
         self.forma.center = (x, y)
         
         # --- variables de IA y ataque ---
-        self.ultimo_ataque = 0
         self.cooldown_ataque = 1000 
+        self.ultimo_ataque = pg.time.get_ticks() - self.cooldown_ataque
+        
         
         # --- variables solo para "patrulla" ---
         self.contador_movimiento = 0
@@ -89,14 +90,23 @@ class Enemigo(pg.sprite.Sprite):
         # asigna la imagen correcta del frame actual
         self.image = self.accion_actual[self.frame_index]
 
+
     def movimiento_enemigo(self, delta_x, delta_y, osbtaculos_tile):
+        """
+        Maneja el movimiento y colisiones BÁSICAS del enemigo.
+        (Es una copia de 'Personaje.movimiento' pero sin cámara ni 'exit_tile')
+        """
+        # --- Lógica de Flip (corregida para enemigos) ---
         if delta_x < 0:
-            self.flip = False
+            self.flip = False # Mover a la izquierda (sprite original)
         if delta_x > 0:
-            self.flip = True
+            self.flip = True # Mover a la derecha (voltear sprite)
+        # -----------------------------------------------
 
         self.forma.x = self.forma.x + delta_x
+        # Colisión en X
         for obstacle in osbtaculos_tile:
+            # Asegúrate de que 'obstacle' es una lista/tupla (como [imagen, rect])
             if obstacle[1].colliderect(self.forma):
                 if delta_x > 0:
                     self.forma.right = obstacle[1].left
@@ -104,6 +114,7 @@ class Enemigo(pg.sprite.Sprite):
                     self.forma.left = obstacle[1].right
 
         self.forma.y = self.forma.y + delta_y
+        # Colisión en Y
         for obstacle in osbtaculos_tile:
             if obstacle[1].colliderect(self.forma):
                 if delta_y > 0:
@@ -112,19 +123,18 @@ class Enemigo(pg.sprite.Sprite):
                     self.forma.top = obstacle[1].bottom
 
     def ia(self, jugador, obstaculos_tiles, posicion_pantalla):
-        """
-        La lógica de "Inteligencia Artificial" (IA) del enemigo.
-        """
         ene_dx = 0
         ene_dy = 0
 
-        # reposicion de enemigos con el movimiento de pantalla
+        # 1. Reposicion de enemigos con el movimiento de pantalla
         self.forma.x += posicion_pantalla[0]
-        self.forma.y += posicion_pantalla[1]
+        self.forma.y += posicion_pantalla[1] 
 
-        # logica de movimiento (segun tipo de IA)
+        # --- mover el calculo de distancia ---
+        # (Ahora se calcula SIEMPRE, para todas las IAs)
         distancia = math.sqrt(((self.forma.centerx - jugador.forma.centerx)**2) + ((self.forma.centery - jugador.forma.centery)**2))
 
+        # 2. Lógica de Movimiento (según el tipo de IA)
         if self.tipo_ia == "persecucion":
             clipped_line = ()
             linea_de_vision = ((self.forma.centerx, self.forma.centery), (jugador.forma.centerx, jugador.forma.centery))
@@ -133,7 +143,7 @@ class Enemigo(pg.sprite.Sprite):
                     clipped_line = obs[1].clipline(linea_de_vision) 
 
             if not clipped_line and distancia < cons.RANGO_PERSECUCION:
-                # Si te ve y está en rango, te persigue
+                # Calcula la dirección del movimiento
                 if self.forma.centerx > jugador.forma.centerx:
                     ene_dx = -self.velocidad
                 if self.forma.centerx < jugador.forma.centerx:
@@ -141,15 +151,14 @@ class Enemigo(pg.sprite.Sprite):
                 if self.forma.centery > jugador.forma.centery:
                     ene_dy = -self.velocidad
                 if self.forma.centery < jugador.forma.centery:
-                    ene_dy = self.velocidad
-                self.set_accion("run")
+                    ene_dy = self.velocidad                
+                    
+                self.set_accion("run") 
             else:
-                # si no te ve o estas lejos, se queda quieto
                 self.set_accion("idle")
         
         elif self.tipo_ia == "patrulla":
-            # patrulla siempre esta en "run"
-            self.set_accion("run") 
+            self.set_accion("run") # <-- CAMBIO: Pone estado "run"
             
             ene_dx = self.velocidad * self.direccion_patrulla
             self.contador_movimiento += 1
@@ -158,15 +167,15 @@ class Enemigo(pg.sprite.Sprite):
                 self.direccion_patrulla *= -1 
                 self.contador_movimiento = 0
                 
-        # aplicar movimiento
+        # 3. Aplicar Movimiento
         self.movimiento_enemigo(ene_dx, ene_dy, obstaculos_tiles)
 
-        # atacar al jugador 
+        # --- CORRECCIÓN 2: Volver a la lógica de ataque por distancia ---
         if distancia < cons.RANGO_ATAQUE and jugador.golpe == False:
             if pg.time.get_ticks() - self.ultimo_ataque > self.cooldown_ataque:
                 jugador.energia -= self.dano 
                 jugador.golpe = True
-                jugador.ultimo_golpe = pg.time.get_ticks()
+                jugador.ultimo_TAQUE = pg.time.get_ticks()
                 self.ultimo_ataque = pg.time.get_ticks()
 
     def dibujar (self, interfaz):

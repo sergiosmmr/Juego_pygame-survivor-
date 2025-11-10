@@ -39,15 +39,15 @@ class Mundo():
         # ---  Diccionario con DAÑO y TIPO_IA ---
         ENEMIGO_BY_TILE = {
             # tile: (anim_idx, base_energia, base_velocidad, base_dano, tipo_ia)
-            90: (6, 100, 1, 5, "patrulla"),     # rana (patrulla)
-            91: (2, 110, 1, 8, "patrulla"),     # cuervo (patrulla)
-            92: (0, 120, 1, 10, "persecucion"), # alien volando (persigue)
-            93: (5, 120, 2, 12, "patrulla"),    # muerte caminando (patrulla)
-            94: (7, 130, 2, 10, "persecucion"), # sapo (persigue)
-            95: (8, 150, 2, 15, "persecucion"), # slime (persigue)
-            96: (1, 150, 3, 18, "persecucion"), # caballo (persigue)
-            97: (3, 180, 3, 20, "demonio"),     # demonio (persigue)
-            98: (4, 200, 3, 25, "mago")         # mago (persigue)
+            93: (6, 100, 1, 5, "patrulla"),     # rana (patrulla) 6
+            94: (2, 110, 1, 8, "patrulla"),     # cuervo (patrulla)
+            95: (0, 120, 1, 10, "persecucion"), # alien volando (persigue)
+            96: (5, 120, 2, 12, "patrulla"),    # muerte caminando (patrulla)
+            97: (7, 130, 2, 10, "persecucion"), # sapo (persigue)
+            98: (8, 150, 2, 15, "persecucion"), # slime (persigue)
+            90: (1, 150, 3, 18, "patrulla"), # caballo (persigue)
+            91: (3, 180, 3, 20, "persecucion"),     # demonio (persigue)
+            92: (4, 200, 3, 25, "persecucion")         # mago (persigue)
         }
         # (¡Podés cambiar "patrulla" por "persecucion" o los valores de daño como quieras!)
         # -----------------------------------------------------------------
@@ -98,7 +98,7 @@ class Mundo():
                                                 tipo_ia, 
                                                 multiplicador) # Aquí se aplica la dificultad!
                                                 
-                    enemigos_append(nuevo_enemigo)
+                    enemigos_append((nuevo_enemigo, tile)) # original esto: enemigos_append(nuevo_enemigo)
                     tile_data[0] = lista_tile[TILE_TRANSPARENTE]
                 # ------------------------------------------------------------
 

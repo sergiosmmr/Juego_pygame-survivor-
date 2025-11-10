@@ -207,43 +207,61 @@ def pantalla_briefing():
     pg.display.update()
 
 def pantalla_selec_personaje():
-    # 1. Fondo negro 
+    # Ya no necesitamos 'global', porque 'sets_anim_jugadores'
+    # es una variable global que podemos leer y modificar (siendo una lista).
+    
     ventana.fill(cons.COLOR_NEGRO) 
-
-    # 2. Dibujar el título
     ventana.blit(texto_titulo_personaje, rect_titulo_personaje)
 
-    # 3. Dibujar los 3 personajes (sus sprites 'idle')
-    
-    # Personaje 1 (caballero)
-    sprite_p1 = sets_anim_jugadores[0]["idle"][0] # Primer frame de idle
-    rect_p1 = sprite_p1.get_rect(center=boton_selec_p1.center)
-    ventana.blit(sprite_p1, rect_p1)
-    
-    # Personaje 2 (heroina)
-    sprite_p2 = sets_anim_jugadores[1]["idle"][0]
-    rect_p2 = sprite_p2.get_rect(center=boton_selec_p2.center)
-    ventana.blit(sprite_p2, rect_p2)
-    
-    # Personaje 3 (necro)
-    sprite_p3 = sets_anim_jugadores[2]["idle"][0]
-    rect_p3 = sprite_p3.get_rect(center=boton_selec_p3.center)
-    ventana.blit(sprite_p3, rect_p3)
-    
+    # 3. Dibujar y animar los 3 personajes
+    botones_personaje = [boton_selec_p1, boton_selec_p2, boton_selec_p3]
+
+    # Iteramos sobre la lista 'sets_anim_jugadores' directamente
+    for i, anim_dict in enumerate(sets_anim_jugadores):
+        
+        # Leemos el estado actual
+        frame_index = anim_dict["frame_index"]
+        update_time = anim_dict["update_time"]
+        cooldown = anim_dict["cooldown"]
+
+        # 3.1. Actualizar la animación de IDLE
+        if "idle" in anim_dict:
+            current_idle_anim = anim_dict["idle"]
+            
+            if pg.time.get_ticks() - update_time >= cooldown:
+                frame_index += 1
+                update_time = pg.time.get_ticks()
+                if frame_index >= len(current_idle_anim):
+                    frame_index = 0
+            
+            # Guardamos el estado actualizado EN LA LISTA ORIGINAL
+            anim_dict["frame_index"] = frame_index
+            anim_dict["update_time"] = update_time
+
+            # 3.2. Dibujar el sprite actual de IDLE
+            sprite_actual = current_idle_anim[frame_index]
+            rect_sprite = sprite_actual.get_rect(center=botones_personaje[i].center)
+            ventana.blit(sprite_actual, rect_sprite)
+        
+        elif "run" in anim_dict:
+            # Fallback para personajes sin 'idle' (dragon)
+            sprite_actual = anim_dict["run"][0]
+            rect_sprite = sprite_actual.get_rect(center=botones_personaje[i].center)
+            ventana.blit(sprite_actual, rect_sprite)
+
     # 4. Dibujar un recuadro de selección
     if personaje_seleccionado_idx == 0:
-        pg.draw.rect(ventana, cons.COLOR_AMARILLO, boton_selec_p1, 4) # Grosor 4
+        pg.draw.rect(ventana, cons.COLOR_AMARILLO, boton_selec_p1, 4)
     elif personaje_seleccionado_idx == 1:
         pg.draw.rect(ventana, cons.COLOR_AMARILLO, boton_selec_p2, 4)
     elif personaje_seleccionado_idx == 2:
         pg.draw.rect(ventana, cons.COLOR_AMARILLO, boton_selec_p3, 4)
 
-    # 5. Dibujar el botón "Siguiente" (reutilizando el Rect de 'boton_comenzar')
+    # 5. Dibujar el botón "Siguiente"
     pg.draw.rect(ventana, cons.COLOR_AMARILLO, boton_comenzar)
     rect_texto_siguiente = texto_boton_siguiente.get_rect(center=boton_comenzar.center)
     ventana.blit(texto_boton_siguiente, rect_texto_siguiente)
 
-    # 6. Actualizar la pantalla
     pg.display.update()
 # ------------------------------------
 
@@ -368,9 +386,9 @@ boton_vol_bajo = pg.Rect(x_inicio_vol, y_boton_vol, ancho_boton_vol, 50)
 boton_vol_norm = pg.Rect(x_inicio_vol + ancho_boton_vol + espacio_boton_vol, y_boton_vol, ancho_boton_vol, 50)
 boton_vol_fuerte = pg.Rect(x_inicio_vol + (ancho_boton_vol + espacio_boton_vol) * 2, y_boton_vol, ancho_boton_vol, 50)
 
-texto_vol_bajo = font_volumen.render("B", True, cons.COLOR_NEGRO)
-texto_vol_norm = font_volumen.render("N", True, cons.COLOR_NEGRO)
-texto_vol_fuerte = font_volumen.render("F", True, cons.COLOR_NEGRO)
+texto_vol_bajo = font_volumen.render("MIN", True, cons.COLOR_NEGRO)
+texto_vol_norm = font_volumen.render("NOR", True, cons.COLOR_NEGRO)
+texto_vol_fuerte = font_volumen.render("MAX", True, cons.COLOR_NEGRO)
 
 # Textos de Ranking
 texto_titulo_ranking = font_titulo.render("RANKING", True, cons.COLOR_BLANCO)
@@ -442,10 +460,13 @@ directorio_jugadores = "assets/images/characters/players"
 # también lo carga automáticamente.
 sets_anim_jugadores = utils.cargar_set_animaciones(directorio_jugadores, cons.ESCALA_PERSONAJE)
 
-# Como solo tenés un jugador ('necro'), tus 'animaciones' son el primer (y único) set
-# en la lista que devolvió la función.
-animaciones = sets_anim_jugadores[0] 
-
+# ---  ---
+# (Preparamos los diccionarios con sus variables de estado)
+for anim_dict in sets_anim_jugadores:
+    anim_dict["frame_index"] = 0
+    anim_dict["update_time"] = pg.time.get_ticks()
+    anim_dict["cooldown"] = 150 # Cooldown para la pantalla de selección
+# -------------------------
 
 # --- Cargar animaciones de ENEMIGOS ---
 directorio_enemigos = "assets/images/characters/enemigos"
@@ -665,7 +686,7 @@ mostrar_controles = False
 mostrar_briefing = False
 mostrar_selec_personaje = False
 evitar_click_fantasma = False
-personaje_seleccionado_idx = 2
+personaje_seleccionado_idx = 1
 
 #crear un jugador de la clase personaje en posicion x , y
 jugador = per.Personaje (80, 80, sets_anim_jugadores[personaje_seleccionado_idx], 80, 1)
@@ -891,8 +912,9 @@ while run:
             jugador.update()
 
             #actualiza estado de enemigo
-            for ene in lista_enemigos:
-                ene.update()
+            for ene_data in lista_enemigos:
+                ene_obj = ene_data[0] # Saca el objeto Enemigo de la tupla
+                ene_obj.update() # Llama a .update() sobre el objeto
         
             
             #actualiza el esatdo del arma
@@ -932,10 +954,14 @@ while run:
         
             #dibujar al enemigo
 
-            for ene in lista_enemigos.copy():  # iterar sobre copia para poder eliminar
+            for ene_data in lista_enemigos.copy():
+                
+                # "Desempaquetamos"
+                ene = ene_data[0]
+
                 if ene.energia <= 0:
-                    lista_enemigos.remove(ene)
-                    continue  #  no seguir procesando/dibujando este enemigo eliminado
+                    lista_enemigos.remove(ene_data) # Removemos la tupla entera
+                    continue
 
                 # update IA / colisiones / etc
                 ene.ia(jugador, world.obstaculos_tiles, posicion_pantalla,)
