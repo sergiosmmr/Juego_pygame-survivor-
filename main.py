@@ -954,8 +954,14 @@ while run:
 
             if bala:
                 grupo_balas.add(bala)
+
+            # "Desempaquetamos" la lista de enemigos (de tuplas)
+            # para pasarle solo los OBJETOS a la bala.
+            lista_de_objetos_enemigos = [ene_data[0] for ene_data in lista_enemigos]
+
             for bala in grupo_balas:
-                damage, post_damage = bala.update(lista_enemigos, world.obstaculos_tiles)    
+                # Ahora le pasamos la lista de OBJETOS, no la de tuplas
+                damage, post_damage = bala.update(lista_de_objetos_enemigos, world.obstaculos_tiles)
                 if damage:
                     damage_text = tx.Damage_text(post_damage.centerx, post_damage.centery, "-" + str(damage), font, cons.COLOR_ROJO)
                     grupo_damage_text.add(damage_text)
@@ -982,6 +988,7 @@ while run:
                 ene = ene_data[0]
 
                 if ene.energia <= 0:
+                    jugador.score += ene.score_value
                     lista_enemigos.remove(ene_data) # Removemos la tupla entera
                     continue
 

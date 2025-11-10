@@ -6,7 +6,7 @@ class Enemigo(pg.sprite.Sprite):
     """
     Representa un enemigo en el juego.
     """
-    def __init__(self, x, y, animaciones_dict, base_energia, base_velocidad, base_dano, tipo_ia, multiplicador):
+    def __init__(self, x, y, animaciones_dict, base_energia, base_velocidad, base_dano, tipo_ia, multiplicador, puntaje_base, tile_id):
         pg.sprite.Sprite.__init__(self) # inicializa la clase Sprite
         
         # --- stats  ---
@@ -15,6 +15,7 @@ class Enemigo(pg.sprite.Sprite):
         self.velocidad = base_velocidad * multiplicador
         self.dano = int(base_dano * multiplicador)
         self.tipo_ia = tipo_ia
+        self.score_value = int(puntaje_base * multiplicador)
         
         # --- animacin ---
         self.flip = False
@@ -23,6 +24,7 @@ class Enemigo(pg.sprite.Sprite):
         self.frame_index = 0
         self.update_time = pg.time.get_ticks()
         self.cooldown_animacion = 100
+        self.tile_id = tile_id
 
         # --- logica de carga ---
         if "idle" in self.animaciones:

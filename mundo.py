@@ -39,15 +39,15 @@ class Mundo():
         # ---  Diccionario con DAÑO y TIPO_IA ---
         ENEMIGO_BY_TILE = {
             # tile: (anim_idx, base_energia, base_velocidad, base_dano, tipo_ia)
-            93: (6, 100, 1, 5, "patrulla"),     # rana (patrulla) 6
-            94: (2, 110, 1, 8, "patrulla"),     # cuervo (patrulla)
-            95: (0, 120, 1, 10, "persecucion"), # alien volando (persigue)
-            96: (5, 120, 2, 12, "patrulla"),    # muerte caminando (patrulla)
-            97: (7, 130, 2, 10, "persecucion"), # sapo (persigue)
-            98: (8, 150, 2, 15, "persecucion"), # slime (persigue)
-            90: (1, 150, 3, 18, "patrulla"), # caballo (persigue)
-            91: (3, 180, 3, 20, "persecucion"),     # demonio (persigue)
-            92: (4, 200, 3, 25, "persecucion")         # mago (persigue)
+            90: (6, 100, 1, 5, "patrulla", 100),     # rana (patrulla) 6
+            91: (2, 110, 1, 8, "patrulla", 150),     # cuervo (patrulla)
+            92: (0, 120, 1, 10, "persecucion", 200), # alien volando (persigue)
+            93: (5, 120, 2, 12, "patrulla", 250),    # muerte caminando (patrulla)
+            94: (7, 130, 2, 10, "persecucion", 300), # sapo (persigue)
+            95: (8, 150, 2, 15, "persecucion", 350), # slime (persigue)
+            96: (1, 150, 3, 18, "patrulla", 400), # caballo (persigue)
+            97: (3, 180, 3, 20, "persecucion", 500),     # demonio (persigue)
+            98: (4, 200, 3, 25, "persecucion", 600)         # mago (persigue)
         }
         # (¡Podés cambiar "patrulla" por "persecucion" o los valores de daño como quieras!)
         # -----------------------------------------------------------------
@@ -86,17 +86,17 @@ class Mundo():
 
                 # --- CAMBIO 3: Lógica de creación de enemigos actualizada ---
                 elif tile in ENEMIGO_BY_TILE:
-                    # 1. Leemos los 5 valores "base" del diccionario
-                    indice_anim, base_energia, base_velocidad, base_dano, tipo_ia = ENEMIGO_BY_TILE[tile]
+                    # 1. Leemos los 6 valores "base" del diccionario
+                    indice_anim, base_energia, base_velocidad, base_dano, tipo_ia, puntaje_base = ENEMIGO_BY_TILE[tile]
                     
-                    # 2. Pasamos esos 5 valores + el multiplicador al crear el enemigo
+                    # 2. Pasamos esos 6 valores + el multiplicador al crear el enemigo + tile_id
                     nuevo_enemigo = ene.Enemigo(image_x, image_y, 
                                                 animacion_enemigos[indice_anim], 
                                                 base_energia, 
                                                 base_velocidad, 
                                                 base_dano, 
                                                 tipo_ia, 
-                                                multiplicador) # Aquí se aplica la dificultad!
+                                                multiplicador, puntaje_base, tile) # Aquí se aplica la dificultad!
                                                 
                     enemigos_append((nuevo_enemigo, tile)) # original esto: enemigos_append(nuevo_enemigo)
                     tile_data[0] = lista_tile[TILE_TRANSPARENTE]
