@@ -37,14 +37,26 @@ def pantalla_inicio():
 
     # Creo el texto y obtengo su ancho
     texto_titulo_str = "S U R V I V O R"
-    texto_surface = font_titulo.render(texto_titulo_str, True, cons.ROJO_OSCURO)
-    ancho_texto = texto_surface.get_width()
+    offset_sombra = 4
+    y_pos_titulo = cons.ALTO_VENTANA/2 - 200 # Posición Y del texto
 
-    #  centrada
-    x_centrada = (cons.ANCHO_VENTANA // 2) - (ancho_texto // 2)
-    # Dibujamos el texto en la x centrada
-    ventana.blit(texto_surface, (x_centrada, cons.ALTO_VENTANA/2 - 200))
+    # 1. Renderizar y posicionar la SOMBRA (NEGRA)
+    sombra_surf = font_titulo.render(texto_titulo_str, True, cons.COLOR_NEGRO)
+    ancho_sombra = sombra_surf.get_width()
+    x_sombra = (cons.ANCHO_VENTANA // 2) - (ancho_sombra // 2)
+    sombra_rect = sombra_surf.get_rect(topleft=(x_sombra + offset_sombra, y_pos_titulo + offset_sombra))
 
+    # 2. Renderizar y posicionar el TEXTO PRINCIPAL (ROJO OSCURO)
+    texto_surf = font_titulo.render(texto_titulo_str, True, cons.ROJO_OSCURO)
+    ancho_texto = texto_surf.get_width()
+    x_texto = (cons.ANCHO_VENTANA // 2) - (ancho_texto // 2)
+    texto_rect = texto_surf.get_rect(topleft=(x_texto, y_pos_titulo))
+
+    # 3. Dibujar (Sombra primero, luego Texto)
+    ventana.blit(sombra_surf, sombra_rect)
+    ventana.blit(texto_surf, texto_rect)
+
+    # --- Botones (Texto Centrado) ---
     pg.draw.rect(ventana, cons.COLOR_AMARILLO, boton_jugar)
     rect_texto_jugar = texto_boton_jugar.get_rect(center=boton_jugar.center)
     ventana.blit(texto_boton_jugar, rect_texto_jugar)
@@ -340,6 +352,7 @@ def pantalla_fin_juego():
 # Fuentes de Título (GOTHIC)
 font_titulo = pg.font.Font(cons.FUENTE_GOTHIC, 100)
 font_game_over = pg.font.Font(cons.FUENTE_GOTHIC, 110)
+font_titulo_secundario = pg.font.Font(cons.FUENTE_TEXTO, 100)
 
 # Fuentes de Texto (TEXTO)
 font_inicio = pg.font.Font(cons.FUENTE_TEXTO, 30)
@@ -373,7 +386,7 @@ texto_boton_salir = font_inicio.render("SALIR", True, cons.COLOR_BLANCO)
 
 
 # Textos de Menú
-texto_titulo_menu = font_titulo.render("MENU", True, cons.COLOR_BLANCO)
+texto_titulo_menu = font_titulo_secundario.render("M E N U", True, cons.COLOR_BLANCO)
 rect_titulo_menu = texto_titulo_menu.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA/2 - 150))
 y_base_menu = cons.ALTO_VENTANA / 2 - 60
 espacio_menu = 60
@@ -417,14 +430,14 @@ texto_titulo_ranking = font_titulo.render("RANKING", True, cons.COLOR_BLANCO)
 rect_titulo_ranking = texto_titulo_ranking.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA/2 - 250))
 
 # Textos de Controles
-texto_titulo_controles = font_titulo.render("CONTROLES", True, cons.COLOR_BLANCO)
+texto_titulo_controles = font_titulo_secundario.render("C O N T R O L E S", True, cons.COLOR_BLANCO)
 rect_titulo_controles = texto_titulo_controles.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA/2 - 200))
 texto_controles_1 = font_reinicio.render("W, A, S, D = Moverse", True, cons.COLOR_BLANCO)
 texto_controles_2 = font_reinicio.render("Click Izquierdo = Disparar", True, cons.COLOR_BLANCO)
 texto_controles_3 = font_reinicio.render("E = Abrir Puertas", True, cons.COLOR_BLANCO)
 
-# Textos de Briefing
-texto_titulo_briefing = font_titulo.render("SOBREVIVE", True, cons.COLOR_BLANCO)
+# Textos de Briefingd
+texto_titulo_briefing = font_titulo_secundario.render("S O B R E V I V E", True, cons.COLOR_BLANCO)
 rect_titulo_briefing = texto_titulo_briefing.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA/2 - 250))
 texto_historia_1 = font_reinicio.render("Hordas de monstruos han invadido.", True, cons.COLOR_BLANCO)
 texto_historia_2 = font_reinicio.render("¡Elimínalos a todos y encuentra la salida!", True, cons.COLOR_AMARILLO)
@@ -432,7 +445,7 @@ boton_comenzar = pg.Rect(cons.ANCHO_VENTANA/2 - 100, cons.ALTO_VENTANA / 2 + 250
 texto_boton_comenzar = font_inicio.render("COMENZAR", True, cons.COLOR_NEGRO)
 
 # --- Variables de la Pantalla de SELECCIÓN DE PERSONAJE ---
-texto_titulo_personaje = font_titulo.render("ELIGE TU HEROE", True, cons.COLOR_BLANCO)
+texto_titulo_personaje = font_titulo_secundario.render("ELIGE TU HEROE", True, cons.COLOR_BLANCO)
 rect_titulo_personaje = texto_titulo_personaje.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA/2 - 250))
 
 # Definimos los Rects donde haremos clic para seleccionar
@@ -944,7 +957,7 @@ while run:
                 ene_obj = ene_data[0] # Saca el objeto Enemigo de la tupla
                 ene_obj.update() # Llama a .update() sobre el objeto
         
-            
+
             #actualiza el esatdo del arma
             bala = None
             
@@ -1031,7 +1044,9 @@ while run:
                     world, lista_enemigos = cargar_world_y_enemigos(nivel, lista_tile, item_imagenes, animacion_enemigos, multiplicador_dificultad)
                     # reposicionar jugador según config
                     jugador.actualizar_coordenadas(cons.COORDENADAS_ENEMIGO_NIVEL[str(nivel)])
-                    # refrescar items del mundo (como ya hacías)
+                    # 1. Vacía los ítems del nivel anterior
+                    grupo_items.empty()
+                    # 2. Carga los ítems del nuevo nivel
                     for item in world.lista_item:
                         grupo_items.add(item)
                 else:
