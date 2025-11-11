@@ -101,6 +101,7 @@ class Personaje():
             if self.forma.top < cons.LIMITES_PANTALLA:
                 posicion_pantalla [1] = cons.LIMITES_PANTALLA - self.forma.top
                 self.forma.top = cons.LIMITES_PANTALLA
+                
             return posicion_pantalla, nivel_completo
         
     def set_accion(self, nueva_accion):

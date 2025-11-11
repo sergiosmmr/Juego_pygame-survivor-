@@ -814,26 +814,32 @@ while run:
                 elif mostrar_opciones_volumen:
                     if boton_vol_bajo.collidepoint(event.pos):
                         aplicar_volumen(cons.MUSICA_VOLUMEN_BAJO, cons.SONIDO_DISPARO_BAJO)
+                        mostrar_opciones_volumen = False
 
                     elif boton_vol_norm.collidepoint(event.pos):
                         aplicar_volumen(cons.MUSICA_VOLUMEN_NORMAL, cons.SONIDO_DISPARO_NORMAL)
+                        mostrar_opciones_volumen = False
 
                     elif boton_vol_fuerte.collidepoint(event.pos):
                         aplicar_volumen(cons.MUSICA_VOLUMEN_FUERTE, cons.SONIDO_DISPARO_FUERTE)
+                        mostrar_opciones_volumen = False
 
                 # Lógica de los botones F, N, D (Dificultad)
                 elif mostrar_opciones_dificultad:
                     if boton_dif_facil.collidepoint(event.pos):
                         multiplicador_dificultad = 0.7
                         print("Dificultad: FÁCIL (0.7)")
+                        mostrar_opciones_dificultad = False
 
                     elif boton_dif_norm.collidepoint(event.pos):
                         multiplicador_dificultad = 1.0
                         print("Dificultad: NORMAL (1.0)")
+                        mostrar_opciones_dificultad = False
 
                     elif boton_dif_fuerte.collidepoint(event.pos):
                         multiplicador_dificultad = 1.5
                         print("Dificultad: DIFÍCIL (1.5)")
+                        mostrar_opciones_dificultad = False
     
     elif mostrar_ranking:
         pantalla_ranking() # Llama a la función de DIBUJO
