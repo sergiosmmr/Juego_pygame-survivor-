@@ -17,7 +17,7 @@ pg. display.set_caption(cons.NOMBRE_JUEGO)
 
 ### variables ####
 posicion_pantalla = [0, 0]
-nivel = 1
+nivel = 3
 multiplicador_dificultad = 1.0
 
 # === MÚSICA ===
@@ -1046,7 +1046,7 @@ while run:
                     jugador.actualizar_coordenadas(cons.COORDENADAS_ENEMIGO_NIVEL[str(nivel)])
                     # 1. Vacía los ítems del nivel anterior
                     grupo_items.empty()
-                    # 2. Carga los ítems del nuevo nivel
+                # Carga los ítems del nuevo nivel
                     for item in world.lista_item:
                         grupo_items.add(item)
                 else:
