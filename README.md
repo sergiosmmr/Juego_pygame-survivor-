@@ -95,4 +95,4 @@ El código está organizado de forma modular para facilitar su mantenimiento:
 ## ✍️ Autor
 
 * **Sergio Maximiliano Martinez Rivero**
-* GitHub: [@sergiosmmr](https://github.com/sergiosmmr)
+* GitHub: [@sergiosmmr](https://github.com/sergiosmmr)   .
