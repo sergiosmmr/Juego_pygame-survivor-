@@ -16,6 +16,8 @@ pg.mixer.init()
 
 ventana = pg.display.set_mode((cons.ANCHO_VENTANA, cons.ALTO_VENTANA))
 pg.display.set_caption(cons.NOMBRE_JUEGO)
+icono = pg.image.load(cons.RUTA_ICONO)
+pg.display.set_icon(icono)
 
 ############### variables ###############
 posicion_pantalla = [0, 0]

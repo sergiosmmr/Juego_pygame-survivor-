@@ -3,6 +3,7 @@ import personaje as per
 
 
 NOMBRE_JUEGO = "FIRTS SURVIVOR"
+RUTA_ICONO = "assets/images/ui/icono_juego.jpg"
 
 ######## MUSICA Y SONIDOS ###########
 MUSICA_PRINCIPAL = "assets/sonidos/principal.mp3"
