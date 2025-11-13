@@ -71,7 +71,7 @@ Este proyecto fue construido utilizando:
 ## 📂 Estructura del Proyecto
 
 El código está organizado de forma modular para facilitar su mantenimiento:
-
+```
 /juego_pygame_SURVIVOR/
 ├── main.py                 # Bucle principal, gestión de eventos y diccionario de assets
 ├── pantalla.py             # Lógica de dibujado de todos los menús y pantallas
@@ -89,7 +89,7 @@ El código está organizado de forma modular para facilitar su mantenimiento:
 ├── scores.csv              # Archivo de guardado de puntajes (se crea al jugar)
 ├── README.md               # Documentación del proyecto
 └── requirements.txt        # Dependencias de Python
-
+```
 ---
 
 ## ✍️ Autor
