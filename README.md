@@ -2,9 +2,9 @@
 
 Un juego 2D de disparos y supervivencia (top-down) desarrollado en Python con Pygame. ¡El objetivo es simple: sobrevive a las hordas de monstruos, acumula puntos y encuentra la salida!
 
-![Screenshot del Menú Principal](./screenshots/gameplay_menu_principal.png)
-![Screenshot de la Jugabilidad](./screenshots/gameplay_partida.png)
-![Screenshot de Menú](./screenshots/gameplay_menu.png)
+![Screenshot del Menú Principal](./screenshoots/gameplay_menu_principal.png)
+![Screenshot de la Jugabilidad](./screenshoots/gameplay_partida.png)
+![Screenshot de Menú](./screenshoots/gameplay_menu.png)
 ---
 
 ## 🎮 Jugabilidad
