@@ -62,6 +62,7 @@ COORDENADAS_ENEMIGO_NIVEL = {"1": (80,60), "2": (350,300), "3": (2000,3100)}
 NIVEL_MAXIMO = 3
 POSICION_TEXTO_SCORE_X = 1050
 POSICION_TEXTO_SCORE_Y = 5 
+SCORES_FILE = "scores.csv"
 
 
 ################### FUENTES  #################
