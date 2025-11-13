@@ -187,6 +187,7 @@ texto_titulo_briefing = font_titulo_secundario.render("S O B R E V I V E", True,
 rect_titulo_briefing = texto_titulo_briefing.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA / 2 - 250))
 texto_historia_1 = font_reinicio.render("Hordas de monstruos han invadido.", True, cons.COLOR_BLANCO)
 texto_historia_2 = font_reinicio.render("¡Elimínalos a todos y encuentra la salida!", True, cons.COLOR_AMARILLO)
+texto_cofre = font_reinicio.render("¡Busca el cofre para escapar!", True, cons.COLOR_AMARILLO)
 boton_comenzar = pg.Rect(cons.ANCHO_VENTANA / 2 - 100, cons.ALTO_VENTANA / 2 + 250, 200, 50)
 texto_boton_comenzar = font_inicio.render("COMENZAR", True, cons.COLOR_NEGRO)
 
@@ -335,6 +336,7 @@ assets = {
     "rect_titulo_briefing": rect_titulo_briefing,
     "texto_historia_1": texto_historia_1,
     "texto_historia_2": texto_historia_2,
+    "texto_cofre": texto_cofre,
     "boton_comenzar": boton_comenzar,
     "texto_boton_comenzar": texto_boton_comenzar,
     
@@ -562,11 +564,10 @@ while run:
                         grupo_items.add(item)
                 else:
                     # ganar
-                    if pg.mixer.music.get_busy(): pg.mixer.music.stop()
                     mensaje_fin_juego = "¡GANASTE!"
                     font_fin_juego = font_titulo
                     jugador.vivo = False
-                    t_fin_juego = pg.time.get_ticks()
+                    #t_fin_juego = pg.time.get_ticks()
                     pg.event.clear()
 
         # --- LOGICA DE FIN DE JUEGO (si no esta vivo) ---
@@ -574,7 +575,14 @@ while run:
             if t_fin_juego == 0:
                 t_fin_juego = pg.time.get_ticks()
                 pg.event.clear()
-                if pg.mixer.music.get_busy(): pg.mixer.music.stop()
+                if pg.mixer.music.get_busy():
+                    pg.mixer.music.stop()
+                if mensaje_fin_juego == "GAME OVER":
+                    pg.mixer.music.load(cons.MUSICA_GAME_OVER)
+                    pg.mixer.music.play(-1) # -1 para que suene en bucle
+                elif mensaje_fin_juego == "¡GANASTE!":
+                    pg.mixer.music.load(cons.MUSICA_GANASTE)
+                    pg.mixer.music.play(-1)
 
             if not input_activo and (pg.time.get_ticks() - t_fin_juego > 1000):
                 input_activo = True

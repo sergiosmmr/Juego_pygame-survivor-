@@ -8,6 +8,8 @@ NOMBRE_JUEGO = "FIRTS SURVIVOR"
 MUSICA_PRINCIPAL = "assets/sonidos/principal.mp3"
 MUSICA_MENU = "assets/sonidos/menu.mp3"
 MUSICA_JUEGO = "assets/sonidos/juego.mp3"
+MUSICA_GAME_OVER = "assets/sonidos/game_over.mp3"
+MUSICA_GANASTE = "assets/sonidos/ganaste.mp3"
 MUSICA_VOLUMEN_BAJO = 0.25
 MUSICA_VOLUMEN_NORMAL = 0.5
 MUSICA_VOLUMEN_FUERTE = 1
@@ -51,7 +53,7 @@ COLOR_NEGRO = (0, 0, 0)
 
 ####### OTROS #######
 FPS = 60
-VELOCIDAD_PERSONAJE = 20
+VELOCIDAD_PERSONAJE = 8
 COOLDOWN_BALAS = 150
 COOLDOWN_MONEDA = 80
 VELOCIDAD_BALAS = 20

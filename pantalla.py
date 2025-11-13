@@ -184,11 +184,15 @@ def pantalla_historia(ventana, assets):
     rect_historia_2 = assets["texto_historia_2"].get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA // 2 - 110))
     ventana.blit(assets["texto_historia_1"], rect_historia_1)
     ventana.blit(assets["texto_historia_2"], rect_historia_2)
+    texto_cofre_surf = assets["texto_cofre"]
+    rect_cofre = texto_cofre_surf.get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA // 2 - 70))
+    ventana.blit(texto_cofre_surf, rect_cofre)
     
     # textos de controles
-    rect_texto_1 = assets["texto_controles_1"].get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA // 2))
-    rect_texto_2 = assets["texto_controles_2"].get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA // 2 + 40))
-    rect_texto_3 = assets["texto_controles_3"].get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA // 2 + 80))
+    rect_texto_1 = assets["texto_controles_1"].get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA // 2 + 20))
+    rect_texto_2 = assets["texto_controles_2"].get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA // 2 + 60))
+    rect_texto_3 = assets["texto_controles_3"].get_rect(center=(cons.ANCHO_VENTANA // 2, cons.ALTO_VENTANA // 2 + 100))
+
     ventana.blit(assets["texto_controles_1"], rect_texto_1)
     ventana.blit(assets["texto_controles_2"], rect_texto_2)
     ventana.blit(assets["texto_controles_3"], rect_texto_3)
