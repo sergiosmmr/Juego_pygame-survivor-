@@ -5,7 +5,6 @@ Un juego 2D de disparos y supervivencia (top-down) desarrollado en Python con Py
 ![Screenshot del Menú Principal](./screenshots/gameplay_menu_principal.png)
 ![Screenshot de la Jugabilidad](./screenshots/gameplay_partida.png)
 ![Screenshot de Menú](./screenshots/gameplay_menu.png)
-
 ---
 
 ## 🎮 Jugabilidad
